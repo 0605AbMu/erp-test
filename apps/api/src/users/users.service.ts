@@ -17,7 +17,7 @@ export class UserService {
 
   async create(userId: number, dto: CreateUserDto) {
 
-    this.checkEmail(dto.email);
+    await this.checkEmail(dto.email);
 
     const passwordHash = hashPassword(dto.password);
 
