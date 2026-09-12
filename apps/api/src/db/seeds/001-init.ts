@@ -12,7 +12,7 @@ export async function seedRoles(pool: Pool): Promise<void> {
     `
       INSERT INTO roles (name)
       VALUES ${placeholders}
-      ON CONFLICT (name) DO NOTHING
+      ON CONFLICT (lower(name)) DO NOTHING
     `,
     roles,
   );

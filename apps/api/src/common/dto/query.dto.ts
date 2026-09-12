@@ -1,7 +1,8 @@
+import { Query } from "@erp-test/shared";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { IsAlphanumeric, IsNumber, IsOptional, IsString, Matches, Max, Min } from "class-validator";
 
-export class QueryDto {
+export class QueryDto implements Query {
     @ApiPropertyOptional({ minimum: 1, default: 1 })
     @IsNumber()
     @Min(1)
@@ -11,7 +12,7 @@ export class QueryDto {
     @ApiPropertyOptional({ default: 10 })
     @IsNumber()
     @Min(0)
-    @Max(100, {message: 'max size is 100'})
+    @Max(100, { message: 'max size is 100' })
     @IsOptional()
     size: number = 10;
 

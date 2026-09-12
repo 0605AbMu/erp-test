@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DbService } from '../db/db.service.js';
-import { UserRow, UserRowFull, UserRowShort } from './users.types.js';
+import { UserRow, UserRowFull, UserRowShort } from '@erp-test/shared';
 import { QueryDto } from '../common/dto/query.dto.js';
 
 @Injectable()

@@ -63,7 +63,6 @@ export class AuthController {
     return this.authService.assignRole(user.id, dto);
   }
 
-  @Authorization(Roles.USER)
   @Get('me')
   getMe(@CurrentUser() user: AuthorizedUser): {
     name: string;

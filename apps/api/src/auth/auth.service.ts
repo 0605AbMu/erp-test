@@ -13,7 +13,7 @@ import { RegisterDto } from './dto/register.dto.js';
 import { UserRepository } from '../users/users.repository.js';
 import { AssignRoleDto } from './dto/assign-role.dto.js';
 import { DbService } from '../db/db.service.js';
-import { Roles } from '@erp-test/shared';
+import { Roles, UserResponse } from '@erp-test/shared';
 
 @Injectable()
 export class AuthService {
@@ -34,26 +34,15 @@ export class AuthService {
     }
 
     const roles = await this.repository.getAllRoles();
-    const userRole = roles.find(x => x.name === Roles.USER);
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    const user = await this.dbService.transactional(async (client) => {
-      const user = await this.repository.createUser({
-        name: dto.name,
-        surname: dto.surname,
-        email: dto.email,
-        passwordHash,
-      }, client);
-
-      await this.repository.assignRole({
-        grantUserId: user.id,
-        roleId: userRole.id,
-        userId: user.id
-      }, client);
-
-      return user;
-    })
+    const user = await this.repository.createUser({
+      name: dto.name,
+      surname: dto.surname,
+      email: dto.email,
+      passwordHash,
+    });
 
     return {
       id: user.id,
@@ -97,14 +86,9 @@ export class AuthService {
     };
   }
 
-  async getUser(userId: number) {
+  async getUser(userId: number): Promise<UserResponse> {
     const user = await this.userRepository.findByIdWithoutPassword(userId);
-    const roles = await this.repository.getUserRoles(userId);
-
-    return {
-      ...user,
-      roles
-    }
+    return user!;
   }
 
   async assignRole(userId: number, dto: AssignRoleDto) {

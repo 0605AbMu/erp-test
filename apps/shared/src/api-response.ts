@@ -1,32 +1,35 @@
-import { HttpStatus } from "@nestjs/common";
+export type PagedResult<T> = {
+  items: T[],
+  total: number;
+}
 
 export type ApiResult<T> =
   {
-    statusCode: HttpStatus
+    statusCode: number
   }
   &
   ({
     success: true;
-    data: T;
+    data: T
   }
-  | {
-    success: false;
-    error: {
-      code: string;
-      message: string;
-      details?: unknown;
-    };
-  });
+    | {
+      success: false;
+      error: {
+        code: string;
+        message: string;
+        details?: unknown;
+      };
+    });
 
 export const exampleApiResult2xx: ApiResult<any> = {
   data: {},
-  statusCode: HttpStatus.OK,
+  statusCode: 200,
   success: true
 }
 
 export const exampleApiResult4xx: ApiResult<any> = {
   success: false,
-  statusCode: HttpStatus.BAD_REQUEST,
+  statusCode: 400,
   error: {
     code: 'ERROR_CODE',
     message: 'human readable error message',
@@ -36,7 +39,7 @@ export const exampleApiResult4xx: ApiResult<any> = {
 
 export const exampleApiResult5xx: ApiResult<any> = {
   success: false,
-  statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  statusCode: 500,
   error: {
     code: 'ERROR_CODE',
     message: 'human readable error message',

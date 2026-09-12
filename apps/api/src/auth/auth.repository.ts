@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service.js';
-import { UserRoles } from './auth.types.js';
+import { UserRoles } from '@erp-test/shared';
 import { PoolClient } from 'pg';
 
 @Injectable()
@@ -74,7 +74,7 @@ export class AuthRepository {
     userId: number;
     grantUserId: number;
     roleId: number;
-  }, client: PoolClient | undefined = undefined){
+  }, client: PoolClient | undefined = undefined) {
     return ((client ?? this.db) as PoolClient).query(`
       INSERT INTO user_roles (
         user_id,
@@ -85,10 +85,10 @@ export class AuthRepository {
       VALUES ($1, $2, $3, NOW())
       RETURNING user_id, role_id
       `,
-    [
-      data.userId,
-      data.roleId,
-      data.grantUserId
-    ])
+      [
+        data.userId,
+        data.roleId,
+        data.grantUserId
+      ])
   }
 }

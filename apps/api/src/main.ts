@@ -18,6 +18,16 @@ async function bootstrap() {
   const express = app.getHttpAdapter().getInstance();
   express.set('trust proxy', 1);
 
+  app.enableCors(
+    // {
+    //   origin: [
+    //     'http://localhost:5173',
+    //     'https://example.com',
+    //   ],
+    // }
+  )
+
+
   const config = app.get(ConfigService);
 
   // Configure ValidationPipe
