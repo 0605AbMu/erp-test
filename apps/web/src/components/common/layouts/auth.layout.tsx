@@ -1,11 +1,14 @@
 import { Card, Layout, Typography } from 'antd';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuthStore } from '../../../stores/auth.store';
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 export default function AuthLayout() {
-
+    if (useAuthStore.getState().isAuthenticated) {
+        return <Navigate to="/dashboard" replace />
+    }
 
     return (
         <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
