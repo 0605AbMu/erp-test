@@ -10,7 +10,10 @@ import { ApiQuery } from '@nestjs/swagger';
 import { PaymentsRepository } from './payments.repository.js';
 import { QueryDto } from '../common/dto/query.dto.js';
 
-@Controller('payments')
+@Controller({
+  path: 'payments',
+  version: '1'
+})
 @Authorization(Roles.PAYMENT)
 export class PaymentsController {
   constructor(

@@ -3,10 +3,13 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { Authorization } from '../common/decorators/authorization.decorator.js';
 import { ReportsService } from './reports.service.js';
 
-@Controller('reports')
+@Controller({
+  path: 'reports',
+  version: '1'
+})
 @Authorization(Roles.REPORT)
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) {}
+  constructor(private readonly reportsService: ReportsService) { }
 
   @Get()
   findAll() {
