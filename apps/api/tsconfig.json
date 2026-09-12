@@ -26,5 +26,5 @@
 
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src", "scripts"]
+  "include": ["src"]
 }
