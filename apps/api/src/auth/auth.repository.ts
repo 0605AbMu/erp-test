@@ -29,21 +29,25 @@ export class AuthRepository {
 
   async createUser(data: {
     name: string;
+    surname: string;
     email: string;
     passwordHash: string;
   }) {
+
     const result = await this.db.query(
       `
       INSERT INTO users (
         name,
+        surname,
         email,
         password_hash
       )
-      VALUES ($1, $2, $3)
-      RETURNING id, name, email
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, name, surname, email
       `,
       [
         data.name,
+        data.surname,
         data.email,
         data.passwordHash,
       ],
@@ -70,7 +74,7 @@ export class AuthRepository {
     grantUserId: number;
     roleId: number;
   }){
-    this.db.query(`
+    return this.db.query(`
       INSERT INTO user_roles (
         user_id,
         role_id,
