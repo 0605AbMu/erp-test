@@ -1,14 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { PaymentsService } from './payments.service.js';
-import { CreatePaymentDto } from './dto/create-payment.dto.js';
-import { UpdatePaymentDto } from './dto/update-payment.dto.js';
-import { Authorization } from '../common/decorators/authorization.decorator.js';
 import { Roles } from '@erp-test/shared';
-import { CurrentUser } from '../common/decorators/current-user.decorator.js';
-import type { AuthorizedUser } from '../common/types/authorized-user.js';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
-import { PaymentsRepository } from './payments.repository.js';
+import { Authorization } from '../common/decorators/authorization.decorator.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { QueryDto } from '../common/dto/query.dto.js';
+import type { AuthorizedUser } from '../common/types/authorized-user.js';
+import { PaymentsRepository } from './payments.repository.js';
+import { PaymentsService } from './payments.service.js';
 
 @Controller({
   path: 'payments',

@@ -1,11 +1,12 @@
 import { Roles } from '@erp-test/shared';
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { Authorization } from '../common/decorators/authorization.decorator.js';
-import { ReportsService } from './reports.service.js';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
+import { Authorization } from '../common/decorators/authorization.decorator.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
-import type { AuthorizedUser } from '../common/types/authorized-user.js';
 import { QueryDto } from '../common/dto/query.dto.js';
+import type { AuthorizedUser } from '../common/types/authorized-user.js';
+import { ReportsRepository } from './reports.repository.js';
+import { ReportsService } from './reports.service.js';
 
 @Controller({
   path: 'reports',
@@ -13,11 +14,15 @@ import { QueryDto } from '../common/dto/query.dto.js';
 })
 @Authorization(Roles.REPORT)
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) { }
+  constructor(
+    private readonly reportsRepository: ReportsRepository,
+    private readonly reportsService: ReportsService
+
+  ) { }
 
   @Get()
   findAll(@Query() query: QueryDto) {
-    return this.reportsService.findAll(query);
+    return this.reportsRepository.findAll(query);
   }
   @Post('mock')
   @ApiQuery({

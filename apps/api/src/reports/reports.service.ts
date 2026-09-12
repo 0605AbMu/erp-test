@@ -8,10 +8,6 @@ export class ReportsService {
   private readonly logger = new Logger(ReportsService.name);
   constructor(private readonly db: DbService) { }
 
-  findAll(query: QueryDto) {
-    return this.db.queryWithPaging(`SELECT * FROM reports`, query);
-  }
-
   findOne(id: number) {
     return `This action returns a #${id} report`;
   }

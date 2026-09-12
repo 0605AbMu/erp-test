@@ -1,4 +1,3 @@
-import { ConfigModule } from '@nestjs/config';
 import { z } from 'zod';
 
 export const envScheme = z.object({
@@ -9,6 +8,7 @@ export const envScheme = z.object({
     PORT: z.coerce.number().default(4000),
 
     JWT_SECRET: z.string(),
+    JWT_EXPIRES_IN: z.string().optional(),
 
     DATABASE_URL: z.string(),
 })

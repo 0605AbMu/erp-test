@@ -1,3 +1,4 @@
+import { Roles } from '@erp-test/shared';
 import {
   Body,
   Controller,
@@ -8,15 +9,14 @@ import {
   Put,
   Query
 } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto.js';
-import { UserService } from './users.service.js';
-import { CurrentUser } from '../common/decorators/current-user.decorator.js';
-import type { AuthorizedUser } from '../common/types/authorized-user.js';
-import { UserRepository } from './users.repository.js';
+import { ApiParam } from '@nestjs/swagger';
 import { Authorization } from '../common/decorators/authorization.decorator.js';
-import { Roles } from '@erp-test/shared';
-import { ApiParam, ApiProperty } from '@nestjs/swagger';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { QueryDto } from '../common/dto/query.dto.js';
+import type { AuthorizedUser } from '../common/types/authorized-user.js';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto.js';
+import { UserRepository } from './users.repository.js';
+import { UserService } from './users.service.js';
 
 @Controller({
   path: 'users',

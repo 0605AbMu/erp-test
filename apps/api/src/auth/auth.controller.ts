@@ -1,22 +1,20 @@
+import { Roles } from '@erp-test/shared';
 import {
   Body,
   Controller,
   Get,
   Param,
-  Post,
-  Version,
+  Post
 } from '@nestjs/common';
-import { AuthService } from './auth.service.js';
-import { LoginDto } from './dto/login.dto.js';
-import { RegisterDto } from './dto/register.dto.js';
-import { Public } from '../common/decorators/public.decorator.js';
-import { AuthRepository } from './auth.repository.js';
-import { Roles } from '@erp-test/shared';
 import { Authorization } from '../common/decorators/authorization.decorator.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { Public } from '../common/decorators/public.decorator.js';
 import type { AuthorizedUser } from '../common/types/authorized-user.js';
-import { UserRepository } from '../users/users.repository.js';
+import { AuthRepository } from './auth.repository.js';
+import { AuthService } from './auth.service.js';
 import { AssignRoleDto } from './dto/assign-role.dto.js';
+import { LoginDto } from './dto/login.dto.js';
+import { RegisterDto } from './dto/register.dto.js';
 
 @Controller({
   path: 'auth',

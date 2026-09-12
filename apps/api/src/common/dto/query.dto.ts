@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsNumber, IsOptional, IsString, Max, MIN, Min } from "class-validator";
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class QueryDto {
     @ApiPropertyOptional({ minimum: 1, default: 1 })
