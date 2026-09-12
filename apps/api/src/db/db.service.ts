@@ -1,10 +1,12 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Pool, QueryResultRow } from 'pg';
 import { ConfigService } from '../config/config.service.js';
+import { QueryDto } from '../common/dto/query.dto.js';
 
 @Injectable()
 export class DbService implements OnModuleDestroy {
   private readonly pool: Pool;
+  private readonly logger = new Logger(DbService.name);
 
   constructor(private readonly config: ConfigService) {
     this.pool = new Pool({
@@ -17,6 +19,58 @@ export class DbService implements OnModuleDestroy {
     values?: unknown[],
   ) {
     return this.pool.query<T>(text, values);
+  }
+
+  async queryWithPaging(tableName: string, queryDto: QueryDto, columns: string[] = []) {
+
+    this.logger.debug(queryDto);
+
+    const query = `
+    SELECT ${columns.length == 0 ? '*' : columns.join(', ')} FROM ${tableName}
+    ORDER BY ${queryDto.order ?? "id"} ${queryDto.descending ? 'DESC' : ''}
+    OFFSET $1
+    LIMIT $2
+    `
+    const totalQuery = `SELECT COUNT(id) as count from ${tableName}`;
+
+    this.logger.debug(query);
+    this.logger.debug(totalQuery);
+
+    const page = (await this.query(query, [(queryDto.page - 1) * queryDto.size, queryDto.size])).rows;
+    const total = (await this.query(totalQuery)).rows[0]?.count ?? 0;
+    
+    return {
+      items: page,
+      total: total
+    }
+  }
+
+  batchInsert(tableName: string, values: {}[]) {
+    if (values.length == 0)
+      return;
+
+    const item0 = values[0];
+    const objectLength = Object.keys(item0).length;
+
+    const valuesQuery = Array.from({ length: values.length }, (v, kroot) => {
+      return '(' + Array.from({ length: objectLength }, (v, k) => `$${kroot * objectLength + k + 1}`).join(", ") + ')'
+    }).join(',\n');
+
+    const rawValues = values.flatMap(x => Object.values(x));
+
+    const columns = Object.keys(item0);
+
+    const rawQuery = `
+        INSERT INTO ${tableName} (
+        ${columns.join(', ')}
+        )
+        VALUES 
+        ${valuesQuery}
+      `;
+
+    this.logger.debug(rawQuery);
+
+    return this.query(rawQuery, rawValues);
   }
 
   async onModuleDestroy() {
