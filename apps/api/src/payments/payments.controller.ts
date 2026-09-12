@@ -31,31 +31,9 @@ export class PaymentsController {
     return this.paymentsService.fillWithMock(user.id, count);
   }
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentsService.create(createPaymentDto);
-  }
-
   @Get()
   // @ApiQuery({ type: QueryDto })
   findAll(@Query() query: QueryDto) {
     return this.paymentRepository.findAll(query);
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentsService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentsService.remove(+id);
-  }
-
-
 }
