@@ -14,6 +14,10 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
+  //configure proxy headers transformation
+  const express = app.getHttpAdapter().getInstance();
+  express.set('trust proxy', 1);
+
   const config = app.get(ConfigService);
 
   // Configure ValidationPipe
