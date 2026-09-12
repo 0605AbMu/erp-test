@@ -5,14 +5,13 @@
     "dev": "concurrently \"pnpm --filter api start:dev\" \"pnpm --filter web dev\"",
     "dev:api": "pnpm --filter api start:dev",
     "dev:web": "pnpm --filter web dev",
-
     "build": "pnpm --filter api build && pnpm --filter web build",
-
     "lint": "pnpm --filter api lint && pnpm --filter web lint",
     "test": "pnpm --filter api test"
   },
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "concurrently": "^10.0.5",
+    "typescript": "^7.0.2"
   },
   "node": {
     "version": "24.21.0"
