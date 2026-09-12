@@ -47,7 +47,7 @@ export class DbService implements OnModuleDestroy {
     }
   }
 
-  batchInsert(tableName: string, values: {}[]) {
+  async batchInsert(tableName: string, values: {}[]) {
     if (values.length == 0)
       return;
 
@@ -63,16 +63,21 @@ export class DbService implements OnModuleDestroy {
     const columns = Object.keys(item0);
 
     const rawQuery = `
+WITH inserted_rows AS (
         INSERT INTO ${tableName} (
         ${columns.join(', ')}
         )
         VALUES 
-        ${valuesQuery}
+        ${valuesQuery} 
+RETURNING *
+          )
+SELECT COUNT(*) as count FROM inserted_rows;
       `;
 
     this.logger.debug(rawQuery);
 
-    return this.query(rawQuery, rawValues);
+    const result = await this.query(rawQuery, rawValues);
+    return result.rows[0]?.count;
   }
 
   async onModuleDestroy() {

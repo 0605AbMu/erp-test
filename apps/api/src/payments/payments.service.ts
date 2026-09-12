@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto.js';
 import { UpdatePaymentDto } from './dto/update-payment.dto.js';
 import { getFakePayment, Payment } from './entities/payment.entity.js';
@@ -9,6 +9,7 @@ import { BadRequest } from '../common/exceptions/bad-request.exception.js';
 
 @Injectable()
 export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
 
   constructor(private readonly db: DbService) { }
 
@@ -38,6 +39,8 @@ export class PaymentsService {
 
     const payments = Array.from({ length: count }, () => getFakePayment(userId));
 
-    await this.db.batchInsert('payments', payments);
+    const inserted = await this.db.batchInsert('payments', payments);
+
+    this.logger.log('Mock data inserted', { inserted });
   }
 }

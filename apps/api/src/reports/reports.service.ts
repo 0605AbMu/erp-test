@@ -1,12 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { getFakeReports } from './entities/report.entity.js';
 import { DbService } from '../db/db.service.js';
 import { QueryDto } from '../common/dto/query.dto.js';
 
 @Injectable()
 export class ReportsService {
+  private readonly logger = new Logger(ReportsService.name);
   constructor(private readonly db: DbService) { }
-  
+
   findAll(query: QueryDto) {
     return this.db.queryWithPaging(`SELECT * FROM reports`, query);
   }
@@ -21,6 +22,8 @@ export class ReportsService {
 
     const reports = Array.from({ length: count }, () => getFakeReports(userId));
 
-    await this.db.batchInsert('reports', reports);
+    const inserted = await this.db.batchInsert('reports', reports);
+
+    this.logger.log('Mock data inserted', { inserted });
   }
 }
