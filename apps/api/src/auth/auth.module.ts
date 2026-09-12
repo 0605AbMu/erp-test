@@ -5,6 +5,8 @@ import { AuthService } from './auth.service.js';
 import { AuthRepository } from './auth.repository.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { ConfigService } from '../config/config.service.js';
+import { UserRepository } from '../users/users.repository.js';
+import { UserModule } from '../users/users.module.js';
 
 @Module({
   imports: [
@@ -14,7 +16,8 @@ import { ConfigService } from '../config/config.service.js';
         secret: config.jwtSecret.secret,
         signOptions: { expiresIn: config.jwtSecret.expiresIn as any },
       }),
-    })
+    }),
+    UserModule
   ],
   controllers: [AuthController],
   providers: [

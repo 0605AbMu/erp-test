@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Version,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
@@ -10,13 +12,19 @@ import { Public } from '../common/decorators/public.decorator.js';
 import { AuthRepository } from './auth.repository.js';
 import { Roles } from '@erp-test/shared';
 import { Authorization } from '../common/decorators/authorization.decorator.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import type { AuthorizedUser } from '../common/types/authorized-user.js';
+import { UserRepository } from '../users/users.repository.js';
 
-@Controller('auth')
+@Controller({
+  path: 'auth',
+  version: '1'
+})
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly authRepository: AuthRepository,
-  ) {}
+  ) { }
 
   @Public()
   @Post('register')
@@ -31,8 +39,16 @@ export class AuthController {
   }
 
   @Authorization(Roles.ADMIN)
-  @Post('roles')
+  @Get('roles')
   getAllRoles() {
     return this.authRepository.getAllRoles();
+  }
+
+  @Authorization(Roles.USER)
+  @Get('me')
+  getMe(@CurrentUser() user: AuthorizedUser): {
+    name: string;
+  } {
+    return this.authService.getMe(user.id) as any;
   }
 }

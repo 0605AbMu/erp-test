@@ -8,13 +8,15 @@ import bcrypt from 'bcrypt';
 import { AuthRepository } from './auth.repository.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
+import { UserRepository } from '../users/users.repository.js';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly repository: AuthRepository,
     private readonly jwtService: JwtService,
-  ) {}
+    private readonly userRepository: UserRepository
+  ) { }
 
   async register(dto: RegisterDto) {
     const existingUser = await this.repository.findByEmail(dto.email);
@@ -56,11 +58,20 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
-      email: user.email,
     });
 
     return {
       accessToken,
     };
+  }
+
+  async getMe(userId: number) {
+    const user = await this.userRepository.findByIdWithoutPassword(userId);
+    const roles = await this.repository.getUserRoles(userId);
+
+    return {
+      ...user,
+      roles
+    }
   }
 }

@@ -11,6 +11,6 @@ import { UserController } from './users.controller.js';
     UserService,
     UserRepository,
   ],
-  exports: [UserService],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}
