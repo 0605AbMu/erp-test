@@ -9,6 +9,8 @@ export class PaymentsRepository {
   ) { }
 
   async findAll(query: QueryDto) {
-    return (await this.db.queryWithPaging('payments', query, ['id', 'user_id', 'amount', 'currency', 'status', 'method', 'transaction_id', 'description', 'paid_at', 'created_at', 'updated_at']));
+    return (await this.db.queryWithPaging(
+      `SELECT * FROM payments`, 
+      query));
   }
 }

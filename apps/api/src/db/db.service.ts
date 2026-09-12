@@ -21,22 +21,24 @@ export class DbService implements OnModuleDestroy {
     return this.pool.query<T>(text, values);
   }
 
-  async queryWithPaging(tableName: string, queryDto: QueryDto, columns: string[] = []) {
+  async queryWithPaging<T extends QueryResultRow = any>(query: string, queryDto: QueryDto) {
 
     this.logger.debug(queryDto);
 
-    const query = `
-    SELECT ${columns.length == 0 ? '*' : columns.join(', ')} FROM ${tableName}
+    const rawQuery = `
+    SELECT * FROM (
+    ${query}
+    )
     ORDER BY ${queryDto.order ?? "id"} ${!!queryDto.desc ? 'DESC' : ''}
     OFFSET $1
     LIMIT $2
     `
-    const totalQuery = `SELECT COUNT(id) as count from ${tableName}`;
+    const totalQuery = `SELECT COUNT(id) as count FROM (${query})`;
 
-    this.logger.debug(query);
+    this.logger.debug(rawQuery);
     this.logger.debug(totalQuery);
 
-    const page = (await this.query(query, [(queryDto.page - 1) * queryDto.size, queryDto.size])).rows;
+    const page = (await this.query<T>(rawQuery, [(queryDto.page - 1) * queryDto.size, queryDto.size])).rows;
     const total = (await this.query(totalQuery)).rows[0]?.count ?? 0;
     
     return {

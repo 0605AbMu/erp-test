@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DbService } from '../db/db.service.js';
 import { UserRow, UserRowFull, UserRowShort } from './users.types.js';
+import { QueryDto } from '../common/dto/query.dto.js';
 
 @Injectable()
 export class UserRepository {
@@ -26,8 +27,8 @@ export class UserRepository {
     return (await this.db.query(`SELECT id, name, surname, email, is_active FROM users`)).rows;
   }
 
-  async fetchAllUsers(): Promise<UserRow[]> {
-    return (await this.db.query(`
+  async fetchAllUsers(query: QueryDto) {
+    return (await this.db.queryWithPaging(`
       SELECT id, name, surname, email, 
       is_active, created_at, updated_at, 
       updated_by_id, created_by_id, COALESCE(ur.roles, '[]'::jsonb) AS roles
@@ -43,7 +44,7 @@ export class UserRepository {
         JOIN roles r on r.id = ur.role_id
         GROUP BY ur.user_id
       ) ur on ur.user_id = u.id
-      `)).rows;
+      `, query));
   }
 
   async findByEmail(email: string): Promise<UserRowShort | undefined> {
