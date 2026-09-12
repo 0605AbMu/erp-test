@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Version,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { Authorization } from '../common/decorators/authorization.decorator.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import type { AuthorizedUser } from '../common/types/authorized-user.js';
 import { UserRepository } from '../users/users.repository.js';
+import { AssignRoleDto } from './dto/assign-role.dto.js';
 
 @Controller({
   path: 'auth',
@@ -44,11 +46,23 @@ export class AuthController {
     return this.authRepository.getAllRoles();
   }
 
+  @Authorization(Roles.ADMIN)
+  @Post('assign-role')
+  assignRole(@CurrentUser() user: AuthorizedUser, @Body() dto: AssignRoleDto) {
+    return this.authService.assignRole(user.id, dto);
+  }
+
   @Authorization(Roles.USER)
   @Get('me')
   getMe(@CurrentUser() user: AuthorizedUser): {
     name: string;
   } {
-    return this.authService.getMe(user.id) as any;
+    return this.authService.getUser(user.id) as any;
+  }
+
+  @Authorization(Roles.ADMIN)
+  @Get('user/:id')
+  getUser(@Param('id') userId: number){
+    return this.authService.getUser(userId) as any;
   }
 }

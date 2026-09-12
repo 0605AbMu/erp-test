@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -9,6 +11,7 @@ import { AuthRepository } from './auth.repository.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { UserRepository } from '../users/users.repository.js';
+import { AssignRoleDto } from './dto/assign-role.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +20,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository
   ) { }
+
+  private readonly logger = new Logger(AuthService.name);
 
   async register(dto: RegisterDto) {
     const existingUser = await this.repository.findByEmail(dto.email);
@@ -65,7 +70,7 @@ export class AuthService {
     };
   }
 
-  async getMe(userId: number) {
+  async getUser(userId: number) {
     const user = await this.userRepository.findByIdWithoutPassword(userId);
     const roles = await this.repository.getUserRoles(userId);
 
@@ -73,5 +78,19 @@ export class AuthService {
       ...user,
       roles
     }
+  }
+
+  async assignRole(userId: number, dto: AssignRoleDto){
+    
+    const userExistedRoles = await this.repository.getUserRoles(dto.userId);
+
+    if (userExistedRoles.findIndex(x => x.role_id == dto.roleId) !== -1)
+      throw new BadRequestException('User already in role');
+  
+    await this.repository.assignRole({
+      grantUserId: userId,
+      roleId: dto.roleId,
+      userId: dto.userId
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '../../config/config.service.js';
@@ -13,11 +13,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  private readonly logger = new Logger(JwtStrategy.name);
+
   async validate(payload: {
     sub: number;
+    exp: number;
   }): Promise<AuthorizedUser> {
-    return {
-      id: payload.sub,
+
+    const user =  {
+      id: Number(payload.sub),
+      exp: payload.exp
     };
+
+    this.logger.debug('Authorized User ',  user)
+
+    return user;
   }
 }

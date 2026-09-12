@@ -63,4 +63,26 @@ export class AuthRepository {
       WHERE ur.user_id = $1
       `, [userId])).rows;
   }
+
+  async assignRole(data: {
+    userId: number;
+    grantUserId: number;
+    roleId: number;
+  }){
+    this.db.query(`
+      INSERT INTO user_roles (
+        user_id,
+        role_id,
+        granted_by,
+        granted_at
+      )
+      VALUES ($1, $2, $3, NOW())
+      RETURNING user_id, role_id
+      `,
+    [
+      data.userId,
+      data.roleId,
+      data.grantUserId
+    ])
+  }
 }
