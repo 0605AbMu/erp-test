@@ -15,7 +15,8 @@ export class AuthRepository {
         id,
         name,
         email,
-        password_hash
+        password_hash,
+        is_active
       FROM users
       WHERE email ILIKE $1
       LIMIT 1

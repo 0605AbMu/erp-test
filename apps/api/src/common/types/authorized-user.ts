@@ -2,4 +2,5 @@
 export interface AuthorizedUser {
     id: number;
     exp: number;
+    roles: string[]
 }

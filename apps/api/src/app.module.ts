@@ -7,6 +7,7 @@ import { DbModule } from './db/db.module.js';
 import { UserModule } from './users/users.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { ReportsModule } from './reports/reports.module.js';
+import { AuthorizationGuard } from './auth/guards/authorization.guard.js';
 
 @Module({
   imports: [ConfigModule, DbModule, AuthModule, UserModule, PaymentsModule, ReportsModule],
@@ -15,6 +16,10 @@ import { ReportsModule } from './reports/reports.module.js';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthorizationGuard,
     }
   ],
 })

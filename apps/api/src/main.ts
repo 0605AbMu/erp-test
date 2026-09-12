@@ -7,6 +7,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { swaggerResponseFormats } from './swagger/global-response-formats.js';
 import { LightThemeCss } from './swagger/swagger.theme.js';
+import { AuthorizationGuard } from './auth/guards/authorization.guard.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

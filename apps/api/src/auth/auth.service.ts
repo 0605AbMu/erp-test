@@ -52,6 +52,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.is_active)
+      throw new UnauthorizedException('User inactive');
+
+    const roles = await this.repository.getUserRoles(user.id);
+
+    if (roles.length == 0)
+      throw new UnauthorizedException('User inactive');
+
     const passwordValid = await bcrypt.compare(
       dto.password,
       user.password_hash,
@@ -63,6 +71,7 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
+      roles: roles.map(x => x.name)
     });
 
     return {
