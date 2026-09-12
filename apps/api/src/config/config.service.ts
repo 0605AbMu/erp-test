@@ -16,7 +16,7 @@ export class ConfigService {
   } {
     return {
       secret: process.env.JWT_SECRET!,
-      expiresIn: process.env.JWT_EXPIRES_IN ?? '15m',
+      expiresIn: process.env.JWT_EXPIRES_IN ?? '10d' //for development use,
     };
   }
 
