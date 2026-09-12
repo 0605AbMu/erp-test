@@ -27,7 +27,7 @@ export class DbService implements OnModuleDestroy {
 
     const query = `
     SELECT ${columns.length == 0 ? '*' : columns.join(', ')} FROM ${tableName}
-    ORDER BY ${queryDto.order ?? "id"} ${queryDto.descending ? 'DESC' : ''}
+    ORDER BY ${queryDto.order ?? "id"} ${!!queryDto.desc ? 'DESC' : ''}
     OFFSET $1
     LIMIT $2
     `

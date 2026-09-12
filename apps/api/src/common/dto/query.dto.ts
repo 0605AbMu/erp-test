@@ -1,24 +1,25 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString, Min } from "class-validator";
 
 export class QueryDto {
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ minimum: 1, default: 1 })
     @IsNumber()
+    @Min(1)
     @IsOptional()
     page: number = 1;
-    
-    @ApiPropertyOptional()
+
+    @ApiPropertyOptional({ default: 10 })
     @IsNumber()
     @IsOptional()
     size: number = 10;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ description: 'property name for order' })
     @IsString()
     @IsOptional()
     order?: string = "id";
 
-    @ApiPropertyOptional()
-    @IsBoolean()
+    @ApiPropertyOptional({ description: 'to use send token' })
+    @IsString()
     @IsOptional()
-    descending?: boolean = false;
+    desc?: string;
 }
