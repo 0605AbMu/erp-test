@@ -1,8 +1,11 @@
 import {
-    Injectable
+  BadRequestException,
+    Injectable,
+    Logger
 } from '@nestjs/common';
 import { UserRepository } from './users.repository.js';
-import { CreateUserDto } from './dto/create-user.dto.js';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto.js';
+import { hashPassword } from '../common/utils/password.util.js';
 
 @Injectable()
 export class UserService {
@@ -10,8 +13,50 @@ export class UserService {
     private readonly repository: UserRepository,
   ) {}
 
-  async create(dto: CreateUserDto) {
-    // Implement user creation logic here, e.g., validation, hashing passwords, etc.
-    // return this.repository.create(dto);
+  private readonly logger = new Logger(UserService.name)
+
+  async create(userId: number, dto: CreateUserDto) {
+
+    this.checkEmail(dto.email);
+
+    const passwordHash = hashPassword(dto.password);
+
+    const storedUserId = await this.repository.addUser({
+      name: dto.name,
+      surname: dto.surname,
+      email: dto.email,
+      is_active: true,
+      created_by_id: userId,
+      update_by_id: null,
+      password_hash: passwordHash
+    });
+
+    return await this.repository.findByIdShort(storedUserId);
+  }
+
+  async update(userId: number, updateUserId: number, dto: UpdateUserDto) {
+    const passwordHash = hashPassword(dto.password);
+
+    const updatedUserId = await this.repository.modifyUser({
+      user_id: updateUserId,
+      name: dto.name,
+      surname: dto.surname,
+      is_active: dto.is_active,
+      update_by_id: userId,
+      password_hash: passwordHash,
+    });
+
+    return await this.repository.findByIdShort(updatedUserId);
+  }
+
+  private async checkEmail(email: string){
+    const user = await this.repository.findByEmail(email);
+
+    if (!!user && user.id > 0)
+      throw new BadRequestException("Email already exists");
+  }
+
+  async remove(userId: number){
+    await this.repository.removeUser(userId);
   }
 }

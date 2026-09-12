@@ -8,6 +8,10 @@ export type UserRowShort = {
 export type UserRow = UserRowShort & {
     created_at: Date;
     updated_at: Date;
+    roles: {
+        role_id: number;
+        name: string;
+    }[],
     created_by_id: number;
     updated_by_id: number;
 }

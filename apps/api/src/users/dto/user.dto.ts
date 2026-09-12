@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString, Matches, Max, MaxLength, MinLength,  } from "class-validator";
+import { ApiProperty, OmitType } from "@nestjs/swagger";
+import { IsBoolean, isBoolean, IsEmail, IsNotEmpty, IsNumber, IsString, Matches, Max, MaxLength, Min, MinLength,  } from "class-validator";
 import { passwordRegex } from "../../common/utils/regex.util.js";
 
 export class CreateUserDto {
@@ -28,4 +28,10 @@ export class CreateUserDto {
     @MinLength(8)
     @Matches(passwordRegex)
     password: string;
+}
+
+export class UpdateUserDto extends OmitType(CreateUserDto, ['email']) {
+    @ApiProperty()
+    @IsBoolean()
+    is_active: boolean;
 }
