@@ -4,6 +4,9 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 @Injectable()
 export class ConfigService {
   constructor(private readonly config: NestConfigService) { };
+  get NODE_ENV() {
+    return this.config.get('NODE_ENV') as 'production' | 'test' | 'development';
+  }
   get databaseUrl(): string {
     return this.config.getOrThrow('DATABASE_URL');
   }

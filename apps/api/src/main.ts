@@ -1,17 +1,20 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import 'dotenv/config';
+// import 'dotenv/config';
 import { AppModule } from './app.module.js';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { swaggerResponseFormats } from './swagger/global-response-formats.js';
 import { LightThemeCss } from './swagger/swagger.theme.js';
+import { ConfigService } from './config/config.service.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
+
+  const config = app.get(ConfigService);
 
   // Configure ValidationPipe
   app.useGlobalPipes(
@@ -34,7 +37,7 @@ async function bootstrap() {
   app.enableVersioning();
 
   // Swagger configuration
-  if (!process.env.SWAGGER_DISABLE) {
+  if (config.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Test ERP API')
       .setDescription('Test ERP REST API')
