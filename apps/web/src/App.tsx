@@ -1,4 +1,4 @@
-import { Roles, type UserRow } from '@erp-test/shared';
+import { Roles } from '@erp-test/shared';
 import { useQuery } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { getMe } from './api/auth';

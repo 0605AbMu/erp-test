@@ -131,14 +131,14 @@ export function Users() {
         {
             title: 'Active',
             dataIndex: 'is_active',
-            render: (val, row, i) => {
+            render: (val, row) => {
                 return <Switch onChange={(checked) => updateStatusMutation.mutate({ id: row.id, isActive: checked })} value={val} />
             }
         },
         {
             title: 'Role',
             dataIndex: 'roles',
-            render: (val, row, i) => <ModifyRole roles={row.roles as []} userId={row.id} />
+            render: (_val, row) => <ModifyRole roles={row.roles as []} userId={row.id} />
         },
     ];
 

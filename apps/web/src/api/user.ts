@@ -10,7 +10,7 @@ export async function getUsers(query: Query): Promise<PagedResult<UserRow>> {
     return unwrapApiResponse(response.data);
 }
 
-export async function updateUserStatus(userId: number, status: boolean): Promise<any> {
+export async function updateUserStatus(_userId: number, _status: boolean): Promise<any> {
     // const response = await api.get<ApiResult<PagedResult<UserRow>>>(
     //     '/v1/users', { params: query }
     // );

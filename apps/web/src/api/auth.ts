@@ -28,7 +28,7 @@ export async function getMe(): Promise<UserResponse> {
 }
 
 
-export async function removeUserRole(userId: number, roleId: number): Promise<any> {
+export async function removeUserRole(_userId: number, _roleId: number): Promise<any> {
     // const response = await api.get<ApiResult<PagedResult<UserRow>>>(
     //     '/v1/users', { params: query }
     // );
