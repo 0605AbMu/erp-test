@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
+import { IsAlphanumeric, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class QueryDto {
     @ApiPropertyOptional({ minimum: 1, default: 1 })
@@ -17,6 +17,7 @@ export class QueryDto {
 
     @ApiPropertyOptional({ description: 'property name for order' })
     @IsString()
+    @IsAlphanumeric()
     @IsOptional()
     order?: string = "id";
 
