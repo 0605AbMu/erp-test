@@ -11,10 +11,13 @@ export function up(pgm: MigrationBuilder) {
     name: {
       type: 'varchar(50)',
       notNull: true,
-      unique: true,
     },
   });
 
+  pgm.createIndex('roles', 'LOWER(name)', {
+    unique: true,
+    name: 'roles_name_lower_unique_idx',
+  });
 
   pgm.createTable('users', {
     id: {
@@ -32,7 +35,6 @@ export function up(pgm: MigrationBuilder) {
     email: {
       type: 'varchar(255)',
       notNull: true,
-      unique: true,
     },
 
     is_active: {
@@ -61,15 +63,20 @@ export function up(pgm: MigrationBuilder) {
     created_by_id: {
       type: 'bigint',
       references: 'users',
-      onDelete: 'CASCADE',
+      onDelete: 'RESTRICT',
     },
 
     updated_by_id: {
       type: 'bigint',
       references: 'users',
-      onDelete: 'CASCADE',
+      onDelete: 'RESTRICT',
     },
 
+  });
+
+  pgm.createIndex('users', 'LOWER(email)', {
+    unique: true,
+    name: 'users_email_lower_unique_idx',
   });
 
   pgm.createIndex('users', 'created_by_id');
@@ -88,7 +95,7 @@ export function up(pgm: MigrationBuilder) {
       type: 'bigint',
       notNull: true,
       references: 'roles',
-      onDelete: 'CASCADE',
+      onDelete: 'RESTRICT',
     },
 
     granted_by: {
@@ -99,9 +106,9 @@ export function up(pgm: MigrationBuilder) {
     },
 
     granted_at: {
-        type: 'timestamptz',
-        notNull: true,
-      }
+      type: 'timestamptz',
+      notNull: true,
+    }
   });
 
   pgm.addConstraint('user_roles', 'pk_user_roles', {
@@ -114,6 +121,10 @@ export function up(pgm: MigrationBuilder) {
 
 export function down(pgm: MigrationBuilder) {
   pgm.dropTable('user_roles');
+
+  pgm.dropIndex('users_email_lower_unique_idx', 'email');
   pgm.dropTable('users');
+
+  pgm.dropIndex('roles_name_lower_unique_idx', 'name');
   pgm.dropTable('roles');
 }
