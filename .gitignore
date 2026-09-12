@@ -11,3 +11,4 @@ coverage/
 *.log
 
 .DS_Store
+apps/api/tsconfig.build.tsbuildinfo
