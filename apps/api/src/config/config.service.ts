@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService as NestConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ConfigService {
+  constructor(private readonly config: NestConfigService) { };
   get databaseUrl(): string {
-    return process.env.DATABASE_URL!;
+    return this.config.getOrThrow('DATABASE_URL');
   }
 
   get port(): number {
-    return Number(process.env.PORT ?? 3000);
+    return this.config.get('PORT', 4000);
   }
 
   get jwtSecret(): {
@@ -15,8 +17,8 @@ export class ConfigService {
     expiresIn: string
   } {
     return {
-      secret: process.env.JWT_SECRET!,
-      expiresIn: process.env.JWT_EXPIRES_IN ?? '10d' //for development use,
+      secret: this.config.getOrThrow("JWT_SECRET"),
+      expiresIn: this.config.get("JWT_EXPIRES_IN", '10d') //for development use,
     };
   }
 
