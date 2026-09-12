@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import { Pool, QueryResultRow } from 'pg';
+import { Pool, PoolClient, QueryResultRow } from 'pg';
 import { ConfigService } from '../config/config.service.js';
 import { QueryDto } from '../common/dto/query.dto.js';
 
@@ -40,7 +40,7 @@ export class DbService implements OnModuleDestroy {
 
     const page = (await this.query<T>(rawQuery, [(queryDto.page - 1) * queryDto.size, queryDto.size])).rows;
     const total = (await this.query(totalQuery)).rows[0]?.count ?? 0;
-    
+
     return {
       items: page,
       total: total
@@ -78,6 +78,27 @@ SELECT COUNT(*) as count FROM inserted_rows;
 
     const result = await this.query(rawQuery, rawValues);
     return result.rows[0]?.count;
+  }
+
+  async transactional<T>(action: (pool: PoolClient) => T) {
+    const client = await this.pool.connect();
+    
+    try {
+      await client.query("BEGIN");
+
+      let result;
+      result = await action(client);
+
+      await client.query("COMMIT");
+
+      return result;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    }
+    finally {
+      client.release();
+    }
   }
 
   async onModuleDestroy() {

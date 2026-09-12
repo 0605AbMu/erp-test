@@ -38,26 +38,22 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    let user;
-
-    try {
-      this.dbService.query('BEGIN')
-
-      user = await this.repository.createUser({
+    const user = await this.dbService.transactional(async (client) => {
+      const user = await this.repository.createUser({
         name: dto.name,
         surname: dto.surname,
         email: dto.email,
         passwordHash,
-      });
+      }, client);
 
-      await this.assignRole(user.id, { roleId: userRole.id, userId: user.id });
+      await this.repository.assignRole({
+        grantUserId: user.id,
+        roleId: userRole.id,
+        userId: user.id
+      }, client);
 
-      this.dbService.query('COMMIT');
-    }
-    catch (e) {
-      this.dbService.query('ROLLBACK');
-      throw e;
-    }
+      return user;
+    })
 
     return {
       id: user.id,
