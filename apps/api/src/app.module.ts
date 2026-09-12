@@ -8,11 +8,25 @@ import { UserModule } from './users/users.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { AuthorizationGuard } from './auth/guards/authorization.guard.js';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
-  imports: [ConfigModule, DbModule, AuthModule, UserModule, PaymentsModule, ReportsModule],
+  imports: [ConfigModule, DbModule, AuthModule, UserModule, PaymentsModule, ReportsModule,
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60_000, //60s
+        limit: 100,
+      },
+    ]),
+
+  ],
   controllers: [],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
