@@ -14,11 +14,11 @@ import {
     useForm,
 } from 'react-hook-form';
 
+import { notification } from "antd";
+import { useNavigate } from 'react-router-dom';
+import { loginApi } from '../../api/auth';
 import { loginSchema, type LoginForm } from '../../schemas/auth.schema';
 import { useAuthStore } from '../../stores/auth.store';
-import { loginApi } from '../../api/auth';
-import { useNavigate } from 'react-router-dom';
-import { notification } from "antd"
 
 export function Login() {
     const navigate = useNavigate();
