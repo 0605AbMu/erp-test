@@ -123,10 +123,6 @@ export class AuthService {
   }
 
   async updateUserCredentials(userId: number, dto: UpdateCredentialsDto) {
-
-    if (dto.userId != userId)
-      throw new BadRequestException("Only user self update available");
-
     const existingUser = await this.repository.findByEmail(dto.email);
 
     if (existingUser) {

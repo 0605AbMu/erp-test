@@ -4,7 +4,8 @@ import {
   Controller,
   Get,
   Param,
-  Post
+  Post,
+  Put
 } from '@nestjs/common';
 import { Authorization } from '../common/decorators/authorization.decorator.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
@@ -16,6 +17,7 @@ import { AssignRoleDto } from './dto/assign-role.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { Throttle } from '@nestjs/throttler';
+import { UpdateCredentialsDto } from './dto/update-credentials.dto.js';
 
 @Controller({
   path: 'auth',
@@ -63,6 +65,12 @@ export class AuthController {
     return this.authService.assignRole(user.id, dto);
   }
 
+  @Authorization(Roles.ADMIN)
+  @Post('unassign-role')
+  unassignRole(@CurrentUser() user: AuthorizedUser, @Body() dto: AssignRoleDto) {
+    return this.authService.unassignRole(user.id, dto);
+  }
+
   @Get('me')
   getMe(@CurrentUser() user: AuthorizedUser): {
     name: string;
@@ -74,5 +82,10 @@ export class AuthController {
   @Get('user/:id')
   getUser(@Param('id') userId: number) {
     return this.authService.getUser(userId) as any;
+  }
+
+  @Put('update-credentials')
+  updateCredentials(@CurrentUser() user: AuthorizedUser, @Body() dto: UpdateCredentialsDto) {
+    return this.authService.updateUserCredentials(user.id, dto);
   }
 }
