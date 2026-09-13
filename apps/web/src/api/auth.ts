@@ -28,18 +28,20 @@ export async function getMe(): Promise<UserResponse> {
 }
 
 
-export async function removeUserRole(_userId: number, _roleId: number): Promise<any> {
-    // const response = await api.get<ApiResult<PagedResult<UserRow>>>(
-    //     '/v1/users', { params: query }
-    // );
+export async function removeUserRole(userId: number, roleId: number): Promise<any> {
+    const response = await api.post(
+        '/v1/auth/unassign-role', { userId, roleId }
+    );
 
-    // return unwrapApiResponse(response.data);
+    return unwrapApiResponse(response.data);
 }
 
 export async function assignRole(userId: number, roleId: number): Promise<any> {
-    await api.post(
+    const response = await api.post(
         '/v1/auth/assign-role', { userId, roleId }
     );
+
+    return unwrapApiResponse(response.data);
 }
 
 

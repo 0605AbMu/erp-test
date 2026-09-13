@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataTable, type TableQuery } from "../../components/common/DataTable";
 import { Flex, Select, Spin, Switch, Tag, type TableProps } from "antd";
 import type { UserRow } from "@erp-test/shared";
-import { getUsers, updateUserStatus } from "../../api/user";
+import { getUsers, updateUser } from "../../api/user";
 import { useState } from "react";
 import { assignRole, getAllRoles, removeUserRole } from "../../api/auth";
 
@@ -98,14 +98,18 @@ export function Users() {
         queryFn: () => getUsers(query),
     });
 
-    const updateStatusMutation = useMutation({
+    const updateUserMutation = useMutation({
         mutationFn: ({
             id,
             isActive,
+            name,
+            surname
         }: {
             id: number;
             isActive: boolean;
-        }) => updateUserStatus(id, isActive),
+            name: string;
+            surname: string;
+        }) => updateUser({ is_active: isActive, userId: id, name: name, surname: surname }),
 
         onSuccess: () => {
             queryClient.invalidateQueries({
@@ -131,14 +135,32 @@ export function Users() {
         {
             title: 'Active',
             dataIndex: 'is_active',
+            sorter: true,
             render: (val, row) => {
-                return <Switch onChange={(checked) => updateStatusMutation.mutate({ id: row.id, isActive: checked })} value={val} />
+                return <Switch onChange={(checked) => updateUserMutation.mutate({ id: row.id, isActive: checked, name: row.name, surname: row.surname })} value={val} />
             }
         },
         {
-            title: 'Role',
+            title: 'Role(s)',
             dataIndex: 'roles',
-            render: (_val, row) => <ModifyRole roles={row.roles as []} userId={row.id} />
+            render: (_val, row) => {
+                return <>
+                    <Flex gap={"small"} wrap>
+                        {row.roles.map((x) =>
+                            <Tag
+                                key={x.role_id}
+                                closable={false}
+                                variant="outlined"
+                                color={"blue"}
+                            >
+                                <span style={{ fontSize: '14px' }}>
+                                    {x.name}
+                                </span>
+                            </Tag>
+                        )}
+                    </Flex>
+                </>
+            }
         },
     ];
 

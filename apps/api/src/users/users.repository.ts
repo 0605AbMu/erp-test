@@ -36,7 +36,7 @@ export class UserRepository {
       LEFT JOIN (
         SELECT ur.user_id,  jsonb_agg(
             jsonb_build_object(
-                'id', r.id,
+                'role_id', r.id,
                 'name', r.name
             )
         ) AS roles
