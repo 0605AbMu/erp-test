@@ -26,8 +26,6 @@ services:
       JWT_EXPIRES_IN: 10m
       R_TOKEN_PERIOD: 10
       DATABASE_URL: postgresql://erp:erp_password@postgres:5432/erp
-    ports:
-      - "4000:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,7 +45,7 @@ services:
       context: .
       dockerfile: docker/web.Dockerfile
       args:
-        VITE_API_URL: http://localhost:4000
+        VITE_API_URL: /api
     restart: unless-stopped
     ports:
       - "80:80"

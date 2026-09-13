@@ -18,64 +18,71 @@ import { Spin } from 'antd';
 import { useEffect } from 'react';
 
 function App() {
-  if (useAuthStore.getState().isAuthenticated) {
-    useEffect(() => {
-      useAuthStore.getState().hydrate();
-    }, []);
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
+}
 
-    const { data, isLoading, isError } = useQuery({
-      queryKey: ['me'],
-      queryFn: getMe,
-    });
+function AppRoutes() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['me'],
+    queryFn: getMe,
+    enabled: isAuthenticated,
+    retry: false,
+  });
 
-    useEffect(() => {
-      if (data) {
-        useAuthStore.getState().setUser(data!);
-      }
-    }, [data]);
+  useEffect(() => {
+    useAuthStore.getState().hydrate();
+  }, []);
 
-    if (isError)
-      return <Navigate to="/login" />
+  useEffect(() => {
+    if (data) {
+      useAuthStore.getState().setUser(data);
+    }
+  }, [data]);
 
-    if (isLoading)
-      return <Spin fullscreen />
+  useEffect(() => {
+    if (isError) {
+      useAuthStore.getState().logout();
+    }
+  }, [isError]);
+
+  if (isAuthenticated && (isLoading || isError)) {
+    return <Spin fullscreen />;
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/">
-          <Route index element={<IndexRouter />} />
+    <Routes>
+      <Route path="/">
+        <Route index element={<IndexRouter />} />
 
-          <Route element={<AuthLayout />}>
-            <Route path='login' element={<Login />} />
-            <Route path='register' element={<Register />} />
-          </Route>
-
-          <Route path="dashboard" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route element={<PrivateRoute roles={[Roles.ADMIN]} fallback={<Forbidden />} />} >
-              <Route path="users" element={<Users />} />
-            </Route>
-
-            <Route element={<PrivateRoute roles={[Roles.PAYMENT]} fallback={<Forbidden />} />} >
-              <Route path="payments" element={<Payments />} />
-            </Route>
-
-            <Route element={<PrivateRoute roles={[Roles.REPORT]} fallback={<Forbidden />} />} >
-              <Route path="reports" element={<Reports />} />
-            </Route>
-
-            <Route path="forbidden" element={<Forbidden />} />
-          </Route>
-
-
-
+        <Route element={<AuthLayout />}>
+          <Route path='login' element={<Login />} />
+          <Route path='register' element={<Register />} />
         </Route>
-        {/* 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+
+        <Route path="dashboard" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route element={<PrivateRoute roles={[Roles.ADMIN]} fallback={<Forbidden />} />} >
+            <Route path="users" element={<Users />} />
+          </Route>
+
+          <Route element={<PrivateRoute roles={[Roles.PAYMENT]} fallback={<Forbidden />} />} >
+            <Route path="payments" element={<Payments />} />
+          </Route>
+
+          <Route element={<PrivateRoute roles={[Roles.REPORT]} fallback={<Forbidden />} />} >
+            <Route path="reports" element={<Reports />} />
+          </Route>
+
+          <Route path="forbidden" element={<Forbidden />} />
+        </Route>
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 

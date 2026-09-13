@@ -98,8 +98,8 @@ Bu buyruq PostgreSQL, API va Nginx orqali frontendni ishga tushiradi. Birinchi i
 Manzillar:
 
 - Web: `http://localhost`
-- API: `http://localhost:4000`
-- API health check: `http://localhost:4000/health`
+- API proxy: `http://localhost/api`
+- API health check: `http://localhost/health`
 
 Containerlarni background’da ishga tushirish:
 
