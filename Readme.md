@@ -14,6 +14,16 @@ pnpm install
 
 `pnpm-workspace.yaml` sababli bu buyruq `apps/api`, `apps/web` va `apps/shared` dependencylarini birga o‘rnatadi.
 
+## Shared package’ni build qilish
+
+API yoki web ilovasini ishga tushirishdan oldin `apps/shared` paketini alohida build qilish kerak:
+
+```bash
+pnpm build:shared
+```
+
+Bu buyruq `apps/shared/src` ichidagi TypeScript kodlarini `apps/shared/dist` katalogiga build qiladi. `pnpm dev`, `pnpm dev:api` va `pnpm dev:web` scriptlari bu build’ni avtomatik ravishda ham ishga tushiradi.
+
 ## Dev muhitida ishga tushirish
 
 ### 1. PostgreSQL’ni ishga tushirish
