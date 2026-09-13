@@ -32,7 +32,7 @@ export const exampleApiResult4xx: ApiResult<any> = {
   statusCode: 400,
   error: {
     code: 'ERROR_CODE',
-    message: 'human readable error message',
+    message: 'Foydalanuvchiga ko‘rsatiladigan xato xabari',
     details: []
   }
 }
@@ -42,7 +42,7 @@ export const exampleApiResult5xx: ApiResult<any> = {
   statusCode: 500,
   error: {
     code: 'ERROR_CODE',
-    message: 'human readable error message',
+    message: 'Foydalanuvchiga ko‘rsatiladigan xato xabari',
     details: []
   }
 }

@@ -37,7 +37,7 @@ export class AuthorizationGuard implements CanActivate {
         const hasRole = requiredRoles.every(x => user.roles.includes(x));
 
         if (!hasRole) {
-            throw new ForbiddenException('Insufficient role(s)');
+            throw new ForbiddenException('Ruxsat uchun yetarli rol mavjud emas');
         }
 
         return true;

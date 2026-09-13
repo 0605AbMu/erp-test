@@ -9,6 +9,8 @@ import { PaymentsModule } from './payments/payments.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { AuthorizationGuard } from './auth/guards/authorization.guard.js';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
+import { HealthController } from './health/health.module.js';
 
 @Module({
   imports: [ConfigModule, DbModule, AuthModule, UserModule, PaymentsModule, ReportsModule,
@@ -19,9 +21,13 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         limit: 100,
       },
     ]),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60_000,
+    })
 
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [
     {
       provide: APP_GUARD,

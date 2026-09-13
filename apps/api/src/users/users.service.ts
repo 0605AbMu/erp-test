@@ -1,17 +1,20 @@
 import {
   BadRequestException,
-    Injectable,
-    Logger
+  Injectable,
+  Logger
 } from '@nestjs/common';
 import { UserRepository } from './users.repository.js';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto.js';
 import { hashPassword } from '../common/utils/password.util.js';
+import { Cache } from '@nestjs/cache-manager';
+import { authTokenVersionKey } from '../common/utils/cache-keys.util.js';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly repository: UserRepository,
-  ) {}
+    private readonly cache: Cache
+  ) { }
 
   private readonly logger = new Logger(UserService.name)
 
@@ -35,7 +38,8 @@ export class UserService {
   }
 
   async update(userId: number, updateUserId: number, dto: UpdateUserDto) {
-    const updatedUserId = await this.repository.modifyUser({
+
+    const updatedUser = await this.repository.modifyUser({
       user_id: updateUserId,
       name: dto.name,
       surname: dto.surname,
@@ -43,17 +47,23 @@ export class UserService {
       update_by_id: userId,
     });
 
-    return await this.repository.findByIdShort(updatedUserId);
+    this.cache.set(authTokenVersionKey(updatedUser.id), updatedUser.token_version);
+
+    return await this.repository.findByIdShort(updatedUser.id);
   }
 
-  private async checkEmail(email: string){
+  private async checkEmail(email: string) {
     const user = await this.repository.findByEmail(email);
 
     if (!!user && user.id > 0)
-      throw new BadRequestException("Email already exists");
+      throw new BadRequestException('Bu email allaqachon mavjud');
   }
 
-  async remove(userId: number){
+  async remove(authorizedUserId: number, userId: number) {
+    if (authorizedUserId == userId)
+      throw new BadRequestException('O\' o\'zini o\'chirish mumkin emas');
+
     await this.repository.removeUser(userId);
+    this.cache.del(authTokenVersionKey(userId));
   }
 }

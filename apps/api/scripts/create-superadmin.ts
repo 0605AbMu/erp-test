@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { parseArgs, ParseArgsOptionsConfig } from 'node:util';
-import { emailRegex, passwordRegex } from "../src/common/utils/regex.util.js";
+import { emailRegex, passwordRegex } from "../../shared/src/regex.util.js";
 import { Roles } from "@erp-test/shared";
 import { hashPassword } from "../src/common/utils/password.util.js";
 import 'dotenv/config';

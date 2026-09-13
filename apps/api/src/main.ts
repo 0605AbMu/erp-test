@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // import 'dotenv/config';
@@ -8,6 +8,48 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor.
 import { swaggerResponseFormats } from './swagger/global-response-formats.js';
 import { LightThemeCss } from './swagger/swagger.theme.js';
 import { ConfigService } from './config/config.service.js';
+import type { ValidationError } from 'class-validator';
+
+const validationPropertyNames: Record<string, string> = {
+  email: 'Elektron pochta',
+  password: 'Parol',
+  name: 'Ism',
+  surname: 'Familiya',
+  size: 'Hajm',
+  page: 'Sahifa',
+  order: 'Saralash maydoni',
+  filters: 'Filtrlar',
+};
+
+function translateValidationErrors(errors: ValidationError[]): string {
+  return errors.flatMap((error) => {
+    const property = validationPropertyNames[error.property] ?? error.property;
+    return Object.entries(error.constraints ?? {}).map(([constraint, value]) => {
+      switch (constraint) {
+        case 'isEmail':
+          return `${property} manzili noto‘g‘ri formatda`;
+        case 'isString':
+          return `${property} matn bo‘lishi kerak`;
+        case 'isNumber':
+          return `${property} son bo‘lishi kerak`;
+        case 'min':
+          return `${property} qiymati juda kichik`;
+        case 'max':
+          return `${property} qiymati juda katta`;
+        case 'isNotEmpty':
+          return `${property} kiritilishi shart`;
+        case 'isOptional':
+          return `${property} ixtiyoriy maydon`;
+        case 'matches':
+          return `${property} formati noto‘g‘ri`;
+        case 'whitelistValidation':
+          return `${property} maydonidan foydalanish mumkin emas`;
+        default:
+          return value;
+      }
+    });
+  }).join('; ');
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -39,6 +81,8 @@ async function bootstrap() {
         enableImplicitConversion: true,
       },
       forbidNonWhitelisted: true,
+      exceptionFactory: (errors) =>
+        new BadRequestException(translateValidationErrors(errors)),
     }),
   );
   //Configure global response interceptor
@@ -56,7 +100,7 @@ async function bootstrap() {
       .setTitle('Test ERP API')
       .setDescription('Test ERP REST API')
       .setVersion('1.0')
-      .addBearerAuth({ description: 'JWT token from header', type: 'http' })
+      .addBearerAuth({ description: 'Sarlavhadagi JWT tokeni', type: 'http' })
       .addSecurityRequirements('bearer')
       .addGlobalResponse(...swaggerResponseFormats as any)
       .build();

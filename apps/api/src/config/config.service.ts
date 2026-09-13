@@ -15,6 +15,10 @@ export class ConfigService {
     return this.config.get('PORT', 4000);
   }
 
+  get rTokenPeriodInDays(): number {
+    return this.config.get('R_TOKEN_PERIOD', 10); //default 10 days
+  }
+
   get jwtSecret(): {
     secret: string,
     expiresIn: string

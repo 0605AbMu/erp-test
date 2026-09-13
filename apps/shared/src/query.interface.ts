@@ -3,5 +3,5 @@ export interface Query {
     size: number;
     order?: string;
     desc?: string;
-    filters?: Record<string, unknown>;
+    filters?: string;
 }

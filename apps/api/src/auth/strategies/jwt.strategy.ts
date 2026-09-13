@@ -18,16 +18,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: {
     sub: number;
     exp: number;
-    roles: string[]
+    roles: string[];
+    tv: number
   }): Promise<AuthorizedUser> {
 
-    const user =  {
+    const user = {
       id: Number(payload.sub),
       exp: payload.exp,
-      roles: payload.roles
+      roles: payload.roles,
+      tv: payload.tv
     };
 
-    this.logger.debug('Authorized User ',  user)
+    this.logger.debug('Authorized User ', user)
 
     return user;
   }

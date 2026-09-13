@@ -55,7 +55,7 @@ export class UserController {
     type: Number,
     description: 'UserId'
   })
-  removeUser(@Param('id') userId: number) {
-    return this.userService.remove(userId);
+  removeUser(@Param('id') userId: number, @CurrentUser() user: AuthorizedUser) {
+    return this.userService.remove(user.id, userId);
   }
 }

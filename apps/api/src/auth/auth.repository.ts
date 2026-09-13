@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service.js';
-import { UserRoles } from '@erp-test/shared';
+import { Session, UserRoles } from '@erp-test/shared';
 import { PoolClient } from 'pg';
 
 @Injectable()
@@ -17,7 +17,8 @@ export class AuthRepository {
         name,
         email,
         password_hash,
-        is_active
+        is_active,
+        token_version
       FROM users
       WHERE email ILIKE $1
       LIMIT 1
@@ -26,6 +27,64 @@ export class AuthRepository {
     );
 
     return result.rows[0] ?? null;
+  }
+
+  async findByUserId(userId: number) {
+    const result = await this.db.query(
+      `
+      SELECT
+        id,
+        name,
+        email,
+        is_active,
+        token_version,
+        r_token,
+        expire_at
+      FROM users
+      WHERE id = $1 and is_active
+      LIMIT 1
+      `,
+      [userId],
+    );
+
+    return result.rows[0] as {
+      id: number;
+      name: string;
+      email: string;
+      is_active: boolean;
+      token_version: number;
+      r_token?: string;
+      expire_at?: Date;
+    } ?? null;
+  }
+
+  async findByUserRefreshToken(token: string) {
+    const result = await this.db.query(
+      `
+      SELECT
+        id,
+        name,
+        email,
+        is_active,
+        token_version,
+        r_token,
+        expire_at
+      FROM users
+      WHERE r_token = $1 and expire_at > NOW()
+      LIMIT 1
+      `,
+      [token],
+    );
+
+    return result.rows[0] as {
+      id: number;
+      name: string;
+      email: string;
+      is_active: boolean;
+      token_version: number;
+      r_token?: string;
+      expire_at?: Date;
+    } ?? null;
   }
 
   async createUser(data: {
@@ -95,9 +154,9 @@ export class AuthRepository {
   async unassignRole({ userId, roleId }: {
     userId: number;
     roleId: number;
-  }) {
+  }, client: PoolClient | undefined = undefined) {
 
-    return this.db.query(`
+    return ((client ?? this.db) as PoolClient).query(`
      DELETE FROM user_roles
      WHERE user_id = $1 AND role_id = $2
      RETURNING user_id, role_id
@@ -119,14 +178,15 @@ export class AuthRepository {
     email: string;
     password_hash: string;
     updaterId: number;
-  }): Promise<number> {
-    return Number((await this.db.query(
+  }) {
+    return (await this.db.query(
       `UPDATE users SET
         email = $2
         password_hash = $4,
         updated_by_id = $6,
-        updated_at = NOW()
-      WHERE id = $1
+        updated_at = NOW(),
+        token_version = token_version + 1
+      WHERE id = $1, token_version
       RETURNING id`,
       [
         userId,
@@ -134,7 +194,77 @@ export class AuthRepository {
         password_hash,
         updaterId
       ]
-    )).rows[0]?.id)
+    )).rows[0] as { id: number; token_version: number }
   }
+
+  async updateUserTokens({ userId, refreshToken, expire_at }: {
+    userId: number;
+    refreshToken: string | null;
+    expire_at: Date | null;
+  }, client: PoolClient | undefined = undefined) {
+    return (await ((client ?? this.db) as PoolClient).query(
+      `UPDATE users SET
+        r_token = $2,
+        expire_at = $3,
+        updated_at = NOW()
+      WHERE id = $1
+      RETURNING id`,
+      [
+        userId,
+        refreshToken,
+        expire_at,
+      ]
+    )).rows[0] as { id: number; }
+  }
+
+  // async addSession({ ...data }: Omit<Session, 'id' | 'created_at' | 'revoked_at'>): Promise<Pick<Session, 'id' | 'created_at'>> {
+  //   const result = await this.db.query(
+  //     `
+  //     INSERT INTO sessions (
+  //       user_id,
+  //       refresh_token_hash,
+  //       user_agent,
+  //       ip
+  //     )
+  //     VALUES ($1, $2, $3, $4)
+  //     RETURNING id, created_at
+  //     `,
+  //     [
+  //       data.user_id,
+  //       data.refresh_token_hash,
+  //       data.user_agent,
+  //       data.ip,
+  //     ],
+  //   );
+
+  //   return result.rows[0];
+  // }
+
+  // async updateSession({ ...data }: Pick<Session, 'id' | 'revoked_at' | 'user_agent' | 'ip' | 'last_used_at'>) {
+  //   return (await this.db.query(
+  //     `UPDATE sessions SET
+  //       revoked_at = $2
+  //       last_used_at = $3,
+  //       user_agent = $4,
+  //       ip = $5
+  //     WHERE id = $1
+  //     RETURNING id`,
+  //     [
+  //       data.id,
+  //       data.revoked_at,
+  //       data.last_used_at,
+  //       data.user_agent,
+  //       data.ip
+  //     ]
+  //   )).rows[0]?.id as string;
+  // }
+
+  // async findSessionById(id: string) {
+  //   return (await this.db.query<Session>(`
+  //     SELECT * FROM sessions
+  //     WHERE id = $1 LIMIT 1
+  //     `,
+  //     [id])).rows[0];
+  // }
 
 }

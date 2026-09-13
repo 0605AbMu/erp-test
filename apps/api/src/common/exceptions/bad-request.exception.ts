@@ -5,7 +5,7 @@ export class BadRequest extends ApiException {
   constructor(options: Partial<ApiExceptionOptions> = {}) {
     super({
     code: 'BAD_REQUEST',
-    message: 'bad request',
+    message: 'Noto‘g‘ri so‘rov',
     statusCode: HttpStatus.BAD_REQUEST,
     ...options
   });

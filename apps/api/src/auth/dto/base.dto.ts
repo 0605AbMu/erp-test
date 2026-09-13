@@ -1,16 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, Matches } from "class-validator";
-import { passwordRegex } from "../../common/utils/regex.util.js";
+import { passwordRegex } from "@erp-test/shared";
 
 export class AuthBaseDto {
   @ApiProperty(
-    {example: "test@mail.com", description: "User email address"}
+    {example: "test@mail.com", description: "Foydalanuvchining elektron pochta manzili"}
   )
   @IsEmail()
   email!: string;
 
   @ApiProperty(
-    {example: "password123", description: "User password"}
+    {example: "password123", description: "Foydalanuvchi paroli"}
   )
   @Matches(passwordRegex)
   password!: string;

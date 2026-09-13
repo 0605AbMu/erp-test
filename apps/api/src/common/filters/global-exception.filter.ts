@@ -50,7 +50,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Internal server error',
+        message: 'Ichki server xatosi',
       },
     });
   }

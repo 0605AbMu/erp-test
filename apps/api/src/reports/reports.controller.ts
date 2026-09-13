@@ -24,11 +24,14 @@ export class ReportsController {
   findAll(@Query() query: QueryDto) {
     return this.reportsRepository.findAll(query);
   }
+
+  @Authorization(Roles.ADMIN)
   @Post('mock')
   @ApiQuery({
     name: 'count',
     type: 'number',
-    description: 'mock item count'
+    description: 'mock item count',
+    required: true
   })
   fillWithMock(@Query('count') count: number, @CurrentUser() user: AuthorizedUser) {
     return this.reportsService.fillWithMock(user.id, count);

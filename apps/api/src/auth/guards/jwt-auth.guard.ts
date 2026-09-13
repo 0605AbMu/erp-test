@@ -1,17 +1,23 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator.js';
+import { AuthorizedUser } from '../../common/types/authorized-user.js';
+import { authTokenVersionKey } from '../../common/utils/cache-keys.util.js';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-    constructor(private readonly reflector: Reflector) {
+  constructor(
+    private readonly reflector: Reflector,
+    @Inject(CACHE_MANAGER)
+    private readonly cache: Cache
+  ) {
     super();
-    }
+  }
 
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        const isPublic = this.reflector.getAllAndOverride<boolean>(
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(
       IS_PUBLIC_KEY,
       [
         context.getHandler(),
@@ -23,6 +29,24 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
-    return super.canActivate(context);
+    const result = await super.canActivate(context);
+
+    if (!result) {
+      return false;
     }
+
+    const request = context.switchToHttp().getRequest();
+
+    const user = request.user as AuthorizedUser;
+
+    const key = authTokenVersionKey(user.id);
+
+    const version = await this.cache.get(key);
+
+    if (Number(version) !== user.tv) {
+      throw new UnauthorizedException("token_version_mismatch");
+    }
+    return true;
+  }
+
 }

@@ -19,7 +19,7 @@ export function ApiResponse<TModel extends Type<unknown>>(
                     },
                     message: {
                         type: 'string',
-                        example: 'Success',
+                        example: 'Muvaffaqiyatli',
                     },
                 },
             },

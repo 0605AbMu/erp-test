@@ -5,7 +5,7 @@ export class NotFoundException extends ApiException {
   constructor(options: Partial<ApiExceptionOptions> = {}) {
     super({
         code: 'NOT_FOUND',
-        message: 'Resource not found',
+        message: 'Resurs topilmadi',
         statusCode: HttpStatus.NOT_FOUND,
         ...options
     });

@@ -2,5 +2,7 @@
 export interface AuthorizedUser {
     id: number;
     exp: number;
-    roles: string[]
+    roles: string[];
+    //token version
+    tv: number;
 }

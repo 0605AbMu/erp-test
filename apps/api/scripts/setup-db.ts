@@ -5,7 +5,7 @@ import { Client } from 'pg';
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL is not defined');
+  throw new Error('DATABASE_URL aniqlanmagan');
 }
 
 async function createDatabase() {
@@ -14,7 +14,7 @@ async function createDatabase() {
   const databaseName = url.pathname.slice(1);
 
   if (!databaseName) {
-    throw new Error('Database name is missing in DATABASE_URL');
+    throw new Error('DATABASE_URL ichida ma’lumotlar bazasi nomi ko‘rsatilmagan');
   }
 
   url.pathname = '/postgres';
@@ -56,9 +56,17 @@ async function run() {
   });
 
   console.log('Database setup completed');
+
+  console.log('Creating super admin...');
+  execSync('pnpm app:superadmin -e superadmin@mail.com -p Password1!', {
+    stdio: 'inherit',
+  });
+
+  console.log("Super admin created with superadmin@mail.com and Password1!");
+  console.log("Completed!!!");
 }
 
 run().catch((error) => {
-  console.error('Database setup failed:', error);
+  console.error('Setup failed:', error);
   process.exit(1);
 });

@@ -13,8 +13,8 @@ export class ReportsService {
   }
 
   async fillWithMock(userId: number, count: number) {
-    if (count > 100)
-      throw new BadRequestException("Max 100 items are allowed");
+    if (count <= 0 && count > 100)
+      throw new BadRequestException('0 dan 100 tagacha element kiritish mumkin');
 
     const reports = Array.from({ length: count }, () => getFakeReports(userId));
 

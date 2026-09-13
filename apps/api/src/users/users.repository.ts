@@ -27,7 +27,13 @@ export class UserRepository {
     return (await this.db.query(`SELECT id, name, surname, email, is_active FROM users`)).rows;
   }
 
-  async fetchAllUsers(query: QueryDto) {
+  async fetchAllUsers(query: QueryDto<UserRow>) {
+
+    const conditions = []
+    if (query.filters?.email) {
+      conditions.push(`email ILIKE '${query.filters.email[0]}'`)
+    }
+
     return (await this.db.queryWithPaging(`
       SELECT id, name, surname, email, 
       is_active, created_at, updated_at, 
@@ -44,6 +50,7 @@ export class UserRepository {
         JOIN roles r on r.id = ur.role_id
         GROUP BY ur.user_id
       ) ur on ur.user_id = u.id
+       ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
       `, query));
   }
 
@@ -93,7 +100,7 @@ export class UserRepository {
         data.created_by_id,
         data.update_by_id
       ]
-    )).rows[0])
+    )).rows[0].id)
   }
 
   /**
@@ -107,16 +114,21 @@ export class UserRepository {
     surname: string;
     is_active: boolean;
     update_by_id: number;
-  }): Promise<number> {
-    return Number((await this.db.query(
+  }) {
+    return ((await this.db.query(
       `UPDATE users SET
         name = $2,
         surname = $3,
         is_active = $4,
         updated_by_id = $5,
-        updated_at = NOW()
+        updated_at = NOW(),
+        token_version = CASE
+          WHEN is_active <> $4
+          THEN token_version + 1
+          ELSE token_version
+          END
       WHERE id = $1
-      RETURNING id`,
+      RETURNING id, token_version`,
       [
         data.user_id,
         data.name,
@@ -124,7 +136,7 @@ export class UserRepository {
         data.is_active,
         data.update_by_id
       ]
-    )).rows[0]?.id)
+    )).rows[0] as { id: number; token_version: number })
   }
 
   async removeUser(userId: number) {

@@ -5,7 +5,9 @@ import {
   Get,
   Param,
   Post,
-  Put
+  Put,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { Authorization } from '../common/decorators/authorization.decorator.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
@@ -18,6 +20,9 @@ import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { Throttle } from '@nestjs/throttler';
 import { UpdateCredentialsDto } from './dto/update-credentials.dto.js';
+import type { Request, Response } from 'express';
+import { ConfigService } from '../config/config.service.js';
+import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 
 @Controller({
   path: 'auth',
@@ -27,6 +32,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly authRepository: AuthRepository,
+    private readonly configService: ConfigService
   ) { }
 
   @Throttle({
@@ -49,8 +55,23 @@ export class AuthController {
   })
   @Public()
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginDto, @Req() req: Request) {
+
+    const ip = req.ip;
+    const userAgent = req.headers['user-agent'];
+
+    return await this.authService.login(dto, ip, userAgent);
+  }
+
+  @Post('logout')
+  async logout(@CurrentUser() user: AuthorizedUser) {
+    return await this.authService.logout(user.id);
+  }
+
+  @Public()
+  @Post('refresh-token')
+  async refreshToken(@Body() dto: RefreshTokenDto) {
+    return await this.authService.refreshToken(dto);
   }
 
   @Authorization(Roles.ADMIN)
@@ -88,4 +109,5 @@ export class AuthController {
   updateCredentials(@CurrentUser() user: AuthorizedUser, @Body() dto: UpdateCredentialsDto) {
     return this.authService.updateUserCredentials(user.id, dto);
   }
+
 }

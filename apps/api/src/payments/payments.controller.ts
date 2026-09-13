@@ -19,6 +19,7 @@ export class PaymentsController {
     private readonly paymentRepository: PaymentsRepository
   ) { }
 
+  @Authorization(Roles.ADMIN)
   @Post('mock')
   @ApiQuery({
     name: 'count',

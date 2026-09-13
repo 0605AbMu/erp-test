@@ -49,7 +49,7 @@ export class DbService implements OnModuleDestroy {
 
   async batchInsert(tableName: string, values: {}[]) {
     if (values.length == 0)
-      return;
+      return 0;
 
     const item0 = values[0];
     const objectLength = Object.keys(item0).length;
@@ -82,7 +82,7 @@ SELECT COUNT(*) as count FROM inserted_rows;
 
   async transactional<T>(action: (pool: PoolClient) => T) {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query("BEGIN");
 
@@ -99,6 +99,18 @@ SELECT COUNT(*) as count FROM inserted_rows;
     finally {
       client.release();
     }
+  }
+
+  async increaseTokenVersion(userId: number, client: PoolClient | undefined = undefined) {
+    return (await ((client ?? this) as PoolClient).query(
+      `UPDATE users SET
+          token_version = token_version + 1
+        WHERE id = $1
+        RETURNING id, token_version`,
+      [
+        userId,
+      ]
+    )).rows[0] as { id: number; token_version: number }
   }
 
   async onModuleDestroy() {

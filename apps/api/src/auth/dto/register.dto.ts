@@ -4,7 +4,7 @@ import { IsString } from "class-validator";
 
 export class RegisterDto extends AuthBaseDto {
   @ApiProperty(
-    {example: "John", description: "Name"}
+    {example: "John", description: "Ism"}
   )
   @IsString()
   name!: string;

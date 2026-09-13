@@ -5,7 +5,7 @@ export class InternalServerErrorException extends ApiException {
   constructor(options: Partial<ApiExceptionOptions> = {}) {
     super({
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Internal server error',
+        message: 'Ichki server xatosi',
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         ...options
     });

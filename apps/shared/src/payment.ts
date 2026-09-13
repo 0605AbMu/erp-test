@@ -15,3 +15,17 @@ export enum PaymentMethod {
     CASH = 'cash',
     CARD = 'card'
 }
+
+export interface PaymentRow {
+    id: number;
+    user_id: number;
+    amount: number;
+    currency: Currency;
+    status: PaymentStatus;
+    method: string;
+    transaction_id?: string;
+    description?: string;
+    paid_at?: Date;
+    created_at?: Date;
+    updated_at?: Date;
+}
