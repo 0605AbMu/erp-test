@@ -4,6 +4,7 @@ import type { ApiResult, UserResponse } from '@erp-test/shared';
 import type { LoginForm } from '../schemas/auth.schema';
 import { api } from './client';
 import { unwrapApiResponse } from './util';
+import type { RegisterForm } from '../schemas/auth.schema';
 
 interface LoginResponse {
     accessToken: string;
@@ -15,6 +16,15 @@ export async function loginApi(
 ): Promise<LoginResponse> {
     const response = await api.post<ApiResult<LoginResponse>>(
         '/v1/auth/login',
+        data,
+    );
+
+    return unwrapApiResponse(response.data);
+}
+
+export async function registerApi(data: RegisterForm) {
+    const response = await api.post<ApiResult<UserResponse>>(
+        '/v1/auth/register',
         data,
     );
 

@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import type { UserRow } from "@erp-test/shared";
+import { Roles, type UserRow } from "@erp-test/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, Flex, Input, Popconfirm, Select, Space, Spin, Switch, Tag, type TableProps } from "antd";
 import { useState } from "react";
@@ -39,7 +39,9 @@ export function AssignRole({ userId, assignedRoleId = [] }: { userId: number, as
     return <>
         <Select
             style={{ width: "100%" }}
-            options={data.filter((x: any) => !assignedRoleId.includes(x.id)).map((x: any) => ({ value: x.id, label: x.name }))}
+            options={(data ?? [])
+                .filter((x: any) => x.name !== Roles.ADMIN && !assignedRoleId.includes(x.id))
+                .map((x: any) => ({ value: x.id, label: x.name }))}
             placeholder="Biriktirish uchun rol tanlang"
             onChange={(value) => {
                 assignRoleMutation.mutate({ userId: userId, roleId: value! })

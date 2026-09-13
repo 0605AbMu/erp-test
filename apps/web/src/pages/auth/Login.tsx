@@ -15,7 +15,7 @@ import {
 } from 'react-hook-form';
 
 import { notification } from "antd";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { loginApi } from '../../api/auth';
 import { loginSchema, type LoginForm } from '../../schemas/auth.schema';
 import { useAuthStore } from '../../stores/auth.store';
@@ -122,6 +122,10 @@ export function Login() {
             >
                 Kirish
             </Button>
+
+            <div className="auth-switch">
+                Hisobingiz yo‘qmi? <Link to="/register">Ro‘yxatdan o‘tish</Link>
+            </div>
         </form>
     );
 }

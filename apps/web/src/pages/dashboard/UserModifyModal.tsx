@@ -3,7 +3,7 @@ import { Form, Input, Modal, Switch } from 'antd';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { passwordRegex, type UserRow } from '@erp-test/shared';
+import { nameRegex, passwordRegex, type UserRow } from '@erp-test/shared';
 
 // const ROLE_OPTIONS = [
 //     {
@@ -26,6 +26,7 @@ const baseUserSchema = z.object({
         .trim()
         .min(2, 'Ism kamida 2 ta belgidan iborat bo‘lishi kerak')
         .max(50, 'Ko\'pi bilan 50 ta belgidan oshmasligi lozim')
+        .regex(nameRegex, 'Ism faqat harflardan iborat bo‘lishi kerak')
     ,
 
     surname: z
@@ -33,6 +34,7 @@ const baseUserSchema = z.object({
         .trim()
         .min(2, 'Familiya kamida 2 ta belgidan iborat bo‘lishi kerak')
         .max(50, 'Ko\'pi bilan 50 ta belgidan oshmasligi lozim')
+        .regex(nameRegex, 'Familiya faqat harflardan iborat bo‘lishi kerak')
     ,
 
     email: z

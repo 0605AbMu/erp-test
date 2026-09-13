@@ -9,7 +9,7 @@ export class PaymentsService {
   constructor(private readonly db: DbService) { }
 
   async fillWithMock(userId: number, count: number) {
-    if (count <= 0 && count > 100)
+    if (count <= 0 || count > 100)
       throw new BadRequestException('0 dan 100 tagacha element kiritish mumkin');
 
     const payments = Array.from({ length: count }, () => getFakePayment(userId));

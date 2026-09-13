@@ -181,13 +181,13 @@ export class AuthRepository {
   }) {
     return (await this.db.query(
       `UPDATE users SET
-        email = $2
-        password_hash = $4,
-        updated_by_id = $6,
+        email = $2,
+        password_hash = $3,
+        updated_by_id = $4,
         updated_at = NOW(),
         token_version = token_version + 1
-      WHERE id = $1, token_version
-      RETURNING id`,
+      WHERE id = $1
+      RETURNING id, token_version`,
       [
         userId,
         email,

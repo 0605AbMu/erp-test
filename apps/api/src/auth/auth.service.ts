@@ -1,4 +1,4 @@
-import { UserResponse } from '@erp-test/shared';
+import { Roles, UserResponse } from '@erp-test/shared';
 import {
   BadRequestException,
   ConflictException,
@@ -134,13 +134,24 @@ export class AuthService {
   }
 
   async assignRole(userId: number, dto: AssignRoleDto) {
+    const role = (await this.repository.getAllRoles()).find(
+      (item) => Number(item.id) === dto.roleId,
+    );
+
+    if (!role) {
+      throw new BadRequestException('Rol topilmadi');
+    }
+
+    if (role.name.toLowerCase() === Roles.ADMIN) {
+      throw new BadRequestException('ADMIN rolini boshqa foydalanuvchiga biriktirib bo‘lmaydi');
+    }
 
     const userExistedRoles = await this.repository.getUserRoles(dto.userId);
 
     if (userExistedRoles.findIndex(x => x.role_id == dto.roleId) !== -1)
       throw new BadRequestException('Foydalanuvchi bu rolga allaqachon ega');
 
-    this.db.transactional(async (pool) => {
+    await this.db.transactional(async (pool) => {
 
       await this.repository.assignRole({
         grantUserId: userId,
@@ -162,7 +173,7 @@ export class AuthService {
       throw new BadRequestException('Foydalanuvchida bu rol mavjud emas');
 
 
-    this.db.transactional(async (pool) => {
+    await this.db.transactional(async (pool) => {
       await this.repository.unassignRole({
         roleId: dto.roleId,
         userId: dto.userId
@@ -183,12 +194,14 @@ export class AuthService {
 
     const passwordHash = hashPassword(dto.password);
 
-    await this.repository.updateUserCredentials({
+    const updatedUser = await this.repository.updateUserCredentials({
       email: dto.email,
       password_hash: passwordHash,
       updaterId: userId,
       userId: userId
     })
+
+    await this.cache.set(authTokenVersionKey(updatedUser.id), updatedUser.token_version);
   }
 
   async logout(userId: number) {

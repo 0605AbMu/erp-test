@@ -6,7 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { ApiException } from '../exceptions/api.exception.js';
 
 @Catch()
@@ -16,7 +16,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     this.logger.error(exception);
     const ctx = host.switchToHttp();
 
+    const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
+    const status = exception instanceof HttpException
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    this.logger.error(`${request.method} ${request.originalUrl ?? request.url} ${status}`);
 
     if (exception instanceof ApiException) {
       response.status(exception.statusCode).json({

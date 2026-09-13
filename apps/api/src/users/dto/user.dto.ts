@@ -1,6 +1,6 @@
 import { ApiProperty, OmitType } from "@nestjs/swagger";
 import { IsBoolean, IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
-import { passwordRegex } from "@erp-test/shared";
+import { nameRegex, passwordRegex } from "@erp-test/shared";
 
 export class CreateUserDto {
     @ApiProperty({ example: "John", description: "User first name" })
@@ -8,6 +8,7 @@ export class CreateUserDto {
     @IsNotEmpty()
     @MinLength(2)
     @MaxLength(50)
+    @Matches(nameRegex)
     name: string;
 
     @ApiProperty({ example: "Doe", description: "User last name" })
@@ -15,6 +16,7 @@ export class CreateUserDto {
     @IsNotEmpty()
     @MinLength(2)
     @MaxLength(50)
+    @Matches(nameRegex)
     surname: string;
 
     @ApiProperty({ example: "john.doe@example.com", description: "User email" })
