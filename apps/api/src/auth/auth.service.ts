@@ -21,7 +21,6 @@ export class AuthService {
     private readonly repository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
-    private readonly dbService: DbService
   ) { }
 
   private readonly logger = new Logger(AuthService.name);
@@ -106,4 +105,20 @@ export class AuthService {
 
     this.logger.log('Role assigned', { ...dto, grantUserId: userId });
   }
+
+  async unassignRole(userId: number, dto: AssignRoleDto) {
+
+    const userExistedRoles = await this.repository.getUserRoles(dto.userId);
+
+    if (userExistedRoles.findIndex(x => x.role_id == dto.roleId) === -1)
+      throw new BadRequestException('User doesn\'t have this role');
+
+    await this.repository.unassignRole({
+      roleId: dto.roleId,
+      userId: dto.userId
+    });
+
+    this.logger.log('Role unassigned', { ...dto, grantUserId: userId });
+  }
+
 }

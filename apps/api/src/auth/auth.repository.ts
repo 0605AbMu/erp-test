@@ -91,4 +91,20 @@ export class AuthRepository {
         data.grantUserId
       ])
   }
+
+  async unassignRole({ userId, roleId }: {
+    userId: number;
+    roleId: number;
+  }) {
+
+    return this.db.query(`
+     DELETE FROM user_roles
+     WHERE user_id = $1 AND role_id = $2
+     RETURNING user_id, role_id
+      `,
+      [
+        userId,
+        roleId
+      ])
+  }
 }
