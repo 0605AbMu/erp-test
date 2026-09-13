@@ -34,6 +34,7 @@ export function DataTable<T extends BaseRow>({
             dataSource={data}
             loading={loading}
             showSorterTooltip
+            scroll={{ x: 'max-content' }}
             pagination={{
                 current: query.page,
                 pageSize: query.size,
@@ -53,7 +54,7 @@ export function DataTable<T extends BaseRow>({
                             ? sort.field
                             : undefined,
 
-                    filters,
+                    filters: JSON.stringify(filters),
 
                     ...(sort?.order === 'descend' ? { desc: 'true' } : {}),
                 });

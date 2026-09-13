@@ -7,6 +7,7 @@ import { unwrapApiResponse } from './util';
 
 interface LoginResponse {
     accessToken: string;
+    refreshToken: string;
 }
 
 export async function loginApi(
@@ -15,6 +16,24 @@ export async function loginApi(
     const response = await api.post<ApiResult<LoginResponse>>(
         '/v1/auth/login',
         data,
+    );
+
+    return unwrapApiResponse(response.data);
+}
+
+export async function logoutApi() {
+    const response = await api.post<ApiResult<any>>(
+        '/v1/auth/logout',
+    );
+    return unwrapApiResponse(response.data);
+}
+
+export async function refreshTokenApi(
+    refreshToken: string,
+): Promise<LoginResponse> {
+    const response = await api.post<ApiResult<LoginResponse>>(
+        '/v1/auth/refresh-token',
+        { refreshToken },
     );
 
     return unwrapApiResponse(response.data);

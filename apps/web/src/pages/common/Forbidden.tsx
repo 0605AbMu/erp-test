@@ -8,10 +8,10 @@ export default function Forbidden() {
         <Result
             status="403"
             title="403"
-            subTitle="Sorry, you are not authorized to access this page."
+            subTitle="Bu sahifaga kirish uchun sizda ruxsat mavjud emas."
             extra={
                 <Button type="primary" onClick={() => navigate('/')}>
-                    Back to Home
+                    Bosh sahifaga qaytish
                 </Button>
             }
         />

@@ -18,6 +18,7 @@ import { loginSchema, type LoginForm } from '../../schemas/auth.schema';
 import { useAuthStore } from '../../stores/auth.store';
 import { loginApi } from '../../api/auth';
 import { useNavigate } from 'react-router-dom';
+import { notification } from "antd"
 
 export function Login() {
     const navigate = useNavigate();
@@ -35,12 +36,17 @@ export function Login() {
             email: '',
             password: '',
         },
+
     });
 
     const onSubmit = async (values: LoginForm) => {
-        const response = await loginApi({ email: values.email, password: values.password });
-        useAuthStore.getState().setToken(response.accessToken);
-        navigate('/');
+        try {
+            const response = await loginApi({ email: values.email, password: values.password });
+            useAuthStore.getState().setToken(response.accessToken, response.refreshToken);
+            navigate('/');
+        } catch (error: any) {
+            notification.error({ description: error.message });
+        }
     };
 
     return (
@@ -48,7 +54,7 @@ export function Login() {
             {/* Email */}
             <div className="form-field">
                 <label htmlFor="email">
-                    Email
+                    Elektron pochta
                 </label>
 
                 <Controller
@@ -60,7 +66,7 @@ export function Login() {
                             id="email"
                             size="large"
                             prefix={<MailOutlined />}
-                            placeholder="Enter your email"
+                            placeholder="Elektron pochtangizni kiriting"
                             status={errors.email ? 'error' : undefined}
                             autoComplete="email"
                         />
@@ -77,7 +83,7 @@ export function Login() {
             {/* Password */}
             <div className="form-field">
                 <label htmlFor="password">
-                    Password
+                    Parol
                 </label>
 
                 <Controller
@@ -89,7 +95,7 @@ export function Login() {
                             id="password"
                             size="large"
                             prefix={<LockOutlined />}
-                            placeholder="Enter your password"
+                            placeholder="Parolingizni kiriting"
                             status={
                                 errors.password
                                     ? 'error'
@@ -114,7 +120,7 @@ export function Login() {
                 block
                 loading={isSubmitting}
             >
-                Sign in
+                Kirish
             </Button>
         </form>
     );

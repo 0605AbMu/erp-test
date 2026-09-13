@@ -33,11 +33,11 @@ export class ErrorBoundary extends Component<Props, State> {
             return (
                 <Result
                     status="error"
-                    title="Something went wrong"
-                    subTitle="An unexpected error occurred."
+                    title="Xatolik yuz berdi"
+                    subTitle="Kutilmagan xatolik yuz berdi."
                     extra={
                         <Button type="primary" onClick={this.handleReload}>
-                            Reload
+                            Qayta yuklash
                         </Button>
                     }
                 />

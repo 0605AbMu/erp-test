@@ -1,3 +1,5 @@
+import { Navigate } from "react-router-dom"
 export function Dashboard() {
-    return <>dashboard</>
+    return <Navigate to="/dashboard/users" />
+    return <></>
 }

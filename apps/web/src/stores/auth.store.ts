@@ -7,13 +7,15 @@ interface AuthState {
     userId: number | null;
     user: UserResponse | null;
     accessToken: string | null;
+    refreshToken: string | null;
     roles: Roles[];
 
     isAuthenticated: boolean;
 
     setUser: (user: UserResponse) => void;
-    setToken: (token: string) => void;
+    setToken: (token: string, refreshToken: string) => void;
     logout: () => void;
+    hydrate: () => void;
     hasRole: (roles: string[]) => boolean;
 }
 
@@ -23,16 +25,26 @@ export const useAuthStore = create<AuthState>()(
             userId: null,
             user: null,
             accessToken: null,
+            refreshToken: null,
             isAuthenticated: false,
             roles: [],
 
             setUser: (user) => set({ user }),
-            setToken: (token) => {
+            setToken: (token, refreshToken) => {
                 const decoded = jwtDecode(token);
-                set({ accessToken: token, isAuthenticated: true, userId: Number(decoded.sub), roles: (decoded as any).roles })
+                set({ accessToken: token, refreshToken: refreshToken, isAuthenticated: true, userId: Number(decoded.sub), roles: (decoded as any).roles })
             },
             logout: () => {
-                set({ isAuthenticated: false, accessToken: null, user: null, userId: null, roles: [] });
+                set({ isAuthenticated: false, accessToken: null, refreshToken: null, user: null, userId: null, roles: [] });
+            },
+
+            hydrate: () => {
+
+                //restore runtime token related states
+                if (get().isAuthenticated && !!get().accessToken) {
+                    const decoded = jwtDecode(get().accessToken as string);
+                    set({ userId: Number(decoded.sub), roles: (decoded as any).roles });
+                }
             },
 
             hasRole: (roles) => {
@@ -49,7 +61,8 @@ export const useAuthStore = create<AuthState>()(
             name: 'auth',
             partialize: (state) => ({
                 accessToken: state.accessToken,
-                isAuthenticated: state.isAuthenticated
+                isAuthenticated: state.isAuthenticated,
+                refreshToken: state.refreshToken
             })
         },
     ),

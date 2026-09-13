@@ -18,49 +18,72 @@ import { Spin } from 'antd';
 import { useEffect } from 'react';
 
 function App() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['me'],
-    queryFn: getMe,
-  });
+  if (useAuthStore.getState().isAuthenticated) {
+    useEffect(() => {
+      useAuthStore.getState().hydrate();
+    }, []);
 
-  useEffect(() => {
-    if (data) {
-      useAuthStore.getState().setUser(data!);
-    }
-  }, [data]);
+    const { data, isLoading, isError } = useQuery({
+      queryKey: ['me'],
+      queryFn: getMe,
+    });
 
-  if (isError)
-    return <Navigate to="/login" />
+    useEffect(() => {
+      if (data) {
+        useAuthStore.getState().setUser(data!);
+      }
+    }, [data]);
 
-  if (isLoading)
-    return <Spin fullscreen />
+    if (isError)
+      return <Navigate to="/login" />
+
+    if (isLoading)
+      return <Spin fullscreen />
+  }
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AuthLayout />} >
-          <Route path='login' element={<Login />} />
-          <Route path='register' element={<Register />} />
-        </Route>
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
+        <Route path="/">
+          <Route index element={<IndexRouter />} />
 
-          <Route element={<PrivateRoute roles={[Roles.PAYMENT]} fallback={<Forbidden />} />} >
-            <Route path="payments" element={<Payments />} />
+          <Route element={<AuthLayout />}>
+            <Route path='login' element={<Login />} />
+            <Route path='register' element={<Register />} />
           </Route>
 
-          <Route element={<PrivateRoute roles={[Roles.REPORT]} fallback={<Forbidden />} />} >
-            <Route path="reports" element={<Reports />} />
+          <Route path="dashboard" element={<DashboardLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route element={<PrivateRoute roles={[Roles.ADMIN]} fallback={<Forbidden />} />} >
+              <Route path="users" element={<Users />} />
+            </Route>
+
+            <Route element={<PrivateRoute roles={[Roles.PAYMENT]} fallback={<Forbidden />} />} >
+              <Route path="payments" element={<Payments />} />
+            </Route>
+
+            <Route element={<PrivateRoute roles={[Roles.REPORT]} fallback={<Forbidden />} />} >
+              <Route path="reports" element={<Reports />} />
+            </Route>
+
+            <Route path="forbidden" element={<Forbidden />} />
           </Route>
 
-          <Route path="forbidden" element={<Forbidden />} />
+
+
         </Route>
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
+}
+
+function IndexRouter() {
+  if (!useAuthStore.getState().isAuthenticated)
+    return <Navigate to="/login" replace />
+
+  return <Navigate to="/dashboard" replace />
 }
 
 export default App;

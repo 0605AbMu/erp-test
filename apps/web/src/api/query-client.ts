@@ -8,8 +8,8 @@ import { notification } from 'antd';
 
 const handleError = (error: Error) => {
     notification.error({
-        title: 'Error',
-        description: error.message || 'Something went wrong',
+        title: 'Xatolik',
+        description: error.message || 'Kutilmagan xatolik yuz berdi',
         placement: 'topRight',
     });
 };

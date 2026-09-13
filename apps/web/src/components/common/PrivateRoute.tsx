@@ -3,7 +3,8 @@ import { useAuthStore } from '../../stores/auth.store';
 import type { Roles } from '@erp-test/shared';
 
 export default function PrivateRoute({ roles, fallback }: { roles: Roles[], fallback: React.ReactNode }) {
-    const { isAuthenticated, hasRole } = useAuthStore();
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+    const hasRole = useAuthStore(state => state.hasRole);
     const location = useLocation();
 
     if (!isAuthenticated) {
