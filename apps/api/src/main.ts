@@ -53,8 +53,11 @@ function translateValidationErrors(errors: ValidationError[]): string {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
+
+  const config = app.get(ConfigService);
+
+  app.useLogger(config.NODE_ENV === 'production' ? ['error', 'warn', 'log'] : ['error', 'warn', 'log', 'debug', 'verbose'])
 
   //configure proxy headers transformation
   const express = app.getHttpAdapter().getInstance();
@@ -68,9 +71,6 @@ async function bootstrap() {
     //   ],
     // }
   )
-
-
-  const config = app.get(ConfigService);
 
   // Configure ValidationPipe
   app.useGlobalPipes(
@@ -112,6 +112,8 @@ async function bootstrap() {
       swaggerOptions: { persistAuthorization: true },
     });
   }
+
+  app.enableShutdownHooks(); //for graceful shutdowns;
 
   await app.listen(process.env.PORT ?? 3000);
 }

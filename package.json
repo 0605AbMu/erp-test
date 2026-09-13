@@ -2,9 +2,9 @@
   "name": "erp-test",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm --filter api start:dev\" \"pnpm --filter web dev\"",
-    "dev:api": "pnpm --filter api start:dev",
-    "dev:web": "pnpm --filter web dev",
+    "dev": "pnpm build:shared && concurrently \"pnpm --filter api start:dev\" \"pnpm --filter web dev\"",
+    "dev:api": "pnpm build:shared && pnpm --filter api start:dev",
+    "dev:web": "pnpm build:shared &&  pnpm --filter web dev",
     "build": "pnpm --filter api build && pnpm --filter web build",
     "build:shared": "pnpm --filter @erp-test/shared build",
     "lint": "pnpm --filter api lint && pnpm --filter web lint",
