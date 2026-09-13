@@ -1,3 +1,4 @@
+import { UserResponse } from '@erp-test/shared';
 import {
   BadRequestException,
   ConflictException,
@@ -7,13 +8,13 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcrypt';
+import { hashPassword } from '../common/utils/password.util.js';
+import { UserRepository } from '../users/users.repository.js';
 import { AuthRepository } from './auth.repository.js';
+import { AssignRoleDto } from './dto/assign-role.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
-import { UserRepository } from '../users/users.repository.js';
-import { AssignRoleDto } from './dto/assign-role.dto.js';
-import { DbService } from '../db/db.service.js';
-import { Roles, UserResponse } from '@erp-test/shared';
+import { UpdateCredentialsDto } from './dto/update-credentials.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -119,6 +120,27 @@ export class AuthService {
     });
 
     this.logger.log('Role unassigned', { ...dto, grantUserId: userId });
+  }
+
+  async updateUserCredentials(userId: number, dto: UpdateCredentialsDto) {
+
+    if (dto.userId != userId)
+      throw new BadRequestException("Only user self update available");
+
+    const existingUser = await this.repository.findByEmail(dto.email);
+
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    const passwordHash = hashPassword(dto.password);
+
+    await this.repository.updateUserCredentials({
+      email: dto.email,
+      password_hash: passwordHash,
+      updaterId: userId,
+      userId: userId
+    })
   }
 
 }

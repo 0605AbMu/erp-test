@@ -107,4 +107,34 @@ export class AuthRepository {
         roleId
       ])
   }
+
+
+  /**
+   * Modify user
+   * @param data 
+   * @returns updated user id
+   */
+  async updateUserCredentials({ userId, email, password_hash, updaterId }: {
+    userId: number;
+    email: string;
+    password_hash: string;
+    updaterId: number;
+  }): Promise<number> {
+    return Number((await this.db.query(
+      `UPDATE users SET
+        email = $2
+        password_hash = $4,
+        updated_by_id = $6,
+        updated_at = NOW()
+      WHERE id = $1
+      RETURNING id`,
+      [
+        userId,
+        email,
+        password_hash,
+        updaterId
+      ]
+    )).rows[0]?.id)
+  }
+
 }

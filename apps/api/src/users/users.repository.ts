@@ -105,8 +105,6 @@ export class UserRepository {
     user_id: number;
     name: string;
     surname: string;
-    // email: string;
-    password_hash: string;
     is_active: boolean;
     update_by_id: number;
   }): Promise<number> {
@@ -114,9 +112,8 @@ export class UserRepository {
       `UPDATE users SET
         name = $2,
         surname = $3,
-        password_hash = $4,
-        is_active = $5,
-        updated_by_id = $6,
+        is_active = $4,
+        updated_by_id = $5,
         updated_at = NOW()
       WHERE id = $1
       RETURNING id`,
@@ -124,7 +121,6 @@ export class UserRepository {
         data.user_id,
         data.name,
         data.surname,
-        data.password_hash,
         data.is_active,
         data.update_by_id
       ]

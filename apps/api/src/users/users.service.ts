@@ -35,15 +35,12 @@ export class UserService {
   }
 
   async update(userId: number, updateUserId: number, dto: UpdateUserDto) {
-    const passwordHash = hashPassword(dto.password);
-
     const updatedUserId = await this.repository.modifyUser({
       user_id: updateUserId,
       name: dto.name,
       surname: dto.surname,
       is_active: dto.is_active,
       update_by_id: userId,
-      password_hash: passwordHash,
     });
 
     return await this.repository.findByIdShort(updatedUserId);
