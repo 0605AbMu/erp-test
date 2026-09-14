@@ -18,7 +18,6 @@ import { AuthService } from './auth.service.js';
 import { AssignRoleDto } from './dto/assign-role.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
-import { Throttle } from '@nestjs/throttler';
 import { UpdateCredentialsDto } from './dto/update-credentials.dto.js';
 import type { Request, Response } from 'express';
 import { ConfigService } from '../config/config.service.js';
@@ -35,24 +34,12 @@ export class AuthController {
     private readonly configService: ConfigService
   ) { }
 
-  @Throttle({
-    default: {
-      limit: 5,
-      ttl: 60_000
-    }
-  })
   @Public()
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
-  @Throttle({
-    default: {
-      limit: 5,
-      ttl: 60_000
-    }
-  })
   @Public()
   @Post('login')
   async login(@Body() dto: LoginDto, @Req() req: Request) {

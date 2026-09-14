@@ -47,7 +47,7 @@ export class UserService {
       update_by_id: userId,
     });
 
-    this.cache.set(authTokenVersionKey(updatedUser.id), updatedUser.token_version);
+    await this.cache.set(authTokenVersionKey(updatedUser.id), updatedUser.token_version);
 
     return await this.repository.findByIdShort(updatedUser.id);
   }
@@ -64,6 +64,6 @@ export class UserService {
       throw new BadRequestException('O\' o\'zini o\'chirish mumkin emas');
 
     await this.repository.removeUser(userId);
-    this.cache.del(authTokenVersionKey(userId));
+    await this.cache.del(authTokenVersionKey(userId));
   }
 }

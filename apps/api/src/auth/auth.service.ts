@@ -151,38 +151,45 @@ export class AuthService {
     if (userExistedRoles.findIndex(x => x.role_id == dto.roleId) !== -1)
       throw new BadRequestException('Foydalanuvchi bu rolga allaqachon ega');
 
-    await this.db.transactional(async (pool) => {
-
+    const updated = await this.db.transactional(async (pool) => {
       await this.repository.assignRole({
         grantUserId: userId,
         roleId: dto.roleId,
         userId: dto.userId
       }, pool);
 
-      await this.db.increaseTokenVersion(dto.userId, pool);
+      const user = await this.db.increaseTokenVersion(dto.userId, pool);
 
       this.logger.log('Role assigned', { ...dto, grantUserId: userId });
-    })
+      return user;
+    });
+
+    if (updated?.token_version) {
+      await this.cache.set(authTokenVersionKey(dto.userId), updated.token_version);
+    }
   }
 
   async unassignRole(userId: number, dto: AssignRoleDto) {
-
     const userExistedRoles = await this.repository.getUserRoles(dto.userId);
 
     if (userExistedRoles.findIndex(x => x.role_id == dto.roleId) === -1)
       throw new BadRequestException('Foydalanuvchida bu rol mavjud emas');
 
-
-    await this.db.transactional(async (pool) => {
+    const updated = await this.db.transactional(async (pool) => {
       await this.repository.unassignRole({
         roleId: dto.roleId,
         userId: dto.userId
       }, pool);
 
-      await this.db.increaseTokenVersion(dto.userId, pool);
+      const user = await this.db.increaseTokenVersion(dto.userId, pool);
 
       this.logger.log('Role unassigned', { ...dto, grantUserId: userId });
-    })
+      return user;
+    });
+
+    if (updated?.token_version) {
+      await this.cache.set(authTokenVersionKey(dto.userId), updated.token_version);
+    }
   }
 
   async updateUserCredentials(userId: number, dto: UpdateCredentialsDto) {
@@ -209,8 +216,9 @@ export class AuthService {
       userId: userId,
       expire_at: null,
       refreshToken: null
-    })
-    this.cache.del(authTokenVersionKey(userId));
+    });
+    await this.db.increaseTokenVersion(userId);
+    await this.cache.del(authTokenVersionKey(userId));
   }
 
 }

@@ -8,31 +8,51 @@ import { UserModule } from './users/users.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { AuthorizationGuard } from './auth/guards/authorization.guard.js';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { CacheModule } from '@nestjs/cache-manager';
+import { CacheModule, CacheManagerOptions } from '@nestjs/cache-manager';
 import { HealthController } from './health/health.module.js';
 
-@Module({
-  imports: [ConfigModule, DbModule, AuthModule, UserModule, PaymentsModule, ReportsModule,
-    ThrottlerModule.forRoot([
-      {
-        name: 'default',
-        ttl: 60_000, //60s
-        limit: 100,
-      },
-    ]),
-    CacheModule.register({
-      isGlobal: true,
-      ttl: 60_000,
-    })
+import { Keyv } from 'keyv';
+import { VercelKvStore } from './common/cache/vercel-kv.store.js';
+import { Logger } from '@nestjs/common';
 
+@Module({
+  imports: [
+    ConfigModule,
+    DbModule,
+    AuthModule,
+    UserModule,
+    PaymentsModule,
+    ReportsModule,
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: (): CacheManagerOptions => {
+        const logger = new Logger('CacheModule');
+        const isVercel = Boolean(process.env.VERCEL);
+        const hasVercelKv = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+
+        if (isVercel && hasVercelKv) {
+          logger.log('Using Vercel KV Cache store');
+          const store = new VercelKvStore();
+          return {
+            stores: [new Keyv({ store })],
+            ttl: 60_000,
+          };
+        }
+
+        if (isVercel) {
+          logger.warn('Running on Vercel, but KV_REST_API_URL / KV_REST_API_TOKEN not found. Using in-memory cache.');
+        } else {
+          logger.log('Using in-memory cache for development');
+        }
+
+        return {
+          ttl: 60_000,
+        };
+      },
+    }),
   ],
   controllers: [HealthController],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
