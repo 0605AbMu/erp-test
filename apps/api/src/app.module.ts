@@ -8,6 +8,7 @@ import { UserModule } from './users/users.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { AuthorizationGuard } from './auth/guards/authorization.guard.js';
+import { ConditionalThrottlerModule } from './common/throttler/conditional-throttler.module.js';
 import { CacheModule, CacheManagerOptions } from '@nestjs/cache-manager';
 import { HealthController } from './health/health.module.js';
 
@@ -23,6 +24,7 @@ import { Logger } from '@nestjs/common';
     UserModule,
     PaymentsModule,
     ReportsModule,
+    ConditionalThrottlerModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: (): CacheManagerOptions => {
