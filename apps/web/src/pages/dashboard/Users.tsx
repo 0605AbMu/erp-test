@@ -1,7 +1,7 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { Roles, type UserRow } from "@erp-test/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Flex, Input, Popconfirm, Select, Space, Spin, Switch, Tag, type TableProps } from "antd";
+import { Button, Card, Flex, Input, Popconfirm, Select, Space, Spin, Switch, Tag, message, type TableProps } from "antd";
 import { useState } from "react";
 import { assignRole, getAllRoles, removeUserRole } from "../../api/auth";
 import { createUser, deleteUser, getUsers, updateUser } from "../../api/user";
@@ -10,12 +10,13 @@ import { useAuthStore } from "../../stores/auth.store";
 import { UserModal } from "./UserModifyModal";
 
 export function AssignRole({ userId, assignedRoleId = [] }: { userId: number, assignedRoleId?: number[] }) {
+    const [selectedRole, setSelectedRole] = useState<number | undefined>(undefined);
     const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
         queryKey: ["roles"],
         queryFn: getAllRoles
-    })
+    });
 
     const assignRoleMutation = useMutation({
         mutationFn: ({
@@ -27,31 +28,42 @@ export function AssignRole({ userId, assignedRoleId = [] }: { userId: number, as
         }) => assignRole(userId, roleId),
 
         onSuccess: () => {
+            setSelectedRole(undefined);
+            message.success("Rol muvaffaqiyatli biriktirildi");
             queryClient.invalidateQueries({
                 queryKey: ['users'],
             });
         },
+        onError: (err: any) => {
+            setSelectedRole(undefined);
+            message.error(err?.response?.data?.error?.message ?? "Rol biriktirishda xatolik yuz berdi");
+        }
     });
 
-    if (isLoading)
-        return <Spin />
+    const options = (data ?? [])
+        .filter((x: any) => x.name !== Roles.ADMIN && !assignedRoleId.includes(x.id))
+        .map((x: any) => ({ value: x.id, label: x.name }));
 
-    return <>
+    return (
         <Select
             style={{ width: "100%" }}
-            options={(data ?? [])
-                .filter((x: any) => x.name !== Roles.ADMIN && !assignedRoleId.includes(x.id))
-                .map((x: any) => ({ value: x.id, label: x.name }))}
+            options={options}
             placeholder="Biriktirish uchun rol tanlang"
+            value={selectedRole}
+            loading={isLoading || assignRoleMutation.isPending}
+            disabled={isLoading || assignRoleMutation.isPending}
             onChange={(value) => {
-                assignRoleMutation.mutate({ userId: userId, roleId: value! })
-                value = undefined;
+                if (value) {
+                    setSelectedRole(value);
+                    assignRoleMutation.mutate({ userId, roleId: value });
+                }
             }}
         />
-    </>
+    );
 }
 
 export function ModifyRole({ roles, userId }: { roles: { name: string, role_id: number }[], userId: number }) {
+    const [removingRoleId, setRemovingRoleId] = useState<number | null>(null);
     const queryClient = useQueryClient();
 
     const removeUserRoleMutation = useMutation({
@@ -64,31 +76,45 @@ export function ModifyRole({ roles, userId }: { roles: { name: string, role_id: 
         }) => removeUserRole(userId, roleId),
 
         onSuccess: () => {
+            setRemovingRoleId(null);
+            message.success("Rol olib tashlandi");
             queryClient.invalidateQueries({
                 queryKey: ['users'],
             });
         },
+        onError: (err: any) => {
+            setRemovingRoleId(null);
+            message.error(err?.response?.data?.error?.message ?? "Rolni olib tashlashda xatolik yuz berdi");
+        }
     });
 
-    return <>
-        <Space vertical>
-            <Flex gap={"medium"} wrap justify="flex-start">
-                {roles.map(x =>
-                    <Tag
-                        key={x.role_id}
-                        variant="filled"
-                        closable
-                        color={"blue-inverse"}
-                        style={{ userSelect: 'none' }}
-                        onClose={() => removeUserRoleMutation.mutate({ roleId: x.role_id, userId: userId })}
-                    >
-                        {x.name.toLocaleUpperCase()}
-                    </Tag>
-                )}
+    return (
+        <Space direction="vertical" style={{ width: "100%" }}>
+            <Flex gap={"small"} wrap justify="flex-start">
+                {roles.map(x => {
+                    const isDeleting = removeUserRoleMutation.isPending && removingRoleId === x.role_id;
+                    return (
+                        <Tag
+                            key={x.role_id}
+                            variant="filled"
+                            closable={!isDeleting}
+                            color={"blue-inverse"}
+                            style={{ userSelect: 'none' }}
+                            onClose={(e) => {
+                                e.preventDefault();
+                                setRemovingRoleId(x.role_id);
+                                removeUserRoleMutation.mutate({ roleId: x.role_id, userId });
+                            }}
+                        >
+                            {isDeleting ? <Spin size="small" style={{ marginRight: 4 }} /> : null}
+                            {x.name.toLocaleUpperCase()}
+                        </Tag>
+                    );
+                })}
             </Flex>
             <AssignRole assignedRoleId={roles.map(x => x.role_id)} userId={userId} />
         </Space>
-    </>
+    );
 }
 
 export function Users() {
@@ -125,7 +151,12 @@ export function Users() {
                 queryKey: ['users'],
             });
             setModalState(false);
+            setModalUser(undefined);
+            message.success("Foydalanuvchi ma'lumotlari yangilandi");
         },
+        onError: (err: any) => {
+            message.error(err?.response?.data?.error?.message ?? "Foydalanuvchini yangilashda xatolik yuz berdi");
+        }
     });
 
     const createUserMutation = useMutation({
@@ -143,7 +174,12 @@ export function Users() {
                 queryKey: ['users'],
             });
             setModalState(false);
+            setModalUser(undefined);
+            message.success("Foydalanuvchi muvaffaqiyatli yaratildi");
         },
+        onError: (err: any) => {
+            message.error(err?.response?.data?.error?.message ?? "Foydalanuvchi yaratishda xatolik yuz berdi");
+        }
     });
 
     const deleteUserMutation = useMutation({
@@ -157,7 +193,11 @@ export function Users() {
             queryClient.invalidateQueries({
                 queryKey: ['users'],
             });
+            message.success("Foydalanuvchi muvaffaqiyatli o'chirildi");
         },
+        onError: (err: any) => {
+            message.error(err?.response?.data?.error?.message ?? "Foydalanuvchini o'chirishda xatolik yuz berdi");
+        }
     });
 
     const columns: TableProps<UserRow>['columns'] = [
@@ -255,28 +295,44 @@ export function Users() {
 
     return (
         <>
-            <UserModal open={modalState} onClose={() => {
-                setModalState(false);
-                setModalUser(undefined);
-            }} onSubmit={(values, isEdit) => {
-                if (!isEdit)
-                    createUserMutation.mutate({
-                        name: values.name,
-                        surname: values.surname,
-                        email: values.email,
-                        password: values.password!
-                    })
-                else updateUserMutation.mutate({
-                    id: values.id!,
-                    isActive: values.isActive!,
-                    name: values.name,
-                    surname: values.surname
-                })
-                setModalUser(undefined);
-            }}
+            <UserModal
+                key={modalUser ? `edit-${modalUser.id}` : 'create'}
+                open={modalState}
+                loading={updateUserMutation.isPending || createUserMutation.isPending}
+                onClose={() => {
+                    setModalState(false);
+                    setModalUser(undefined);
+                }}
+                onSubmit={(values, isEdit) => {
+                    if (!isEdit) {
+                        createUserMutation.mutate({
+                            name: values.name,
+                            surname: values.surname,
+                            email: values.email!,
+                            password: values.password!,
+                        });
+                    } else {
+                        updateUserMutation.mutate({
+                            id: values.id!,
+                            isActive: values.isActive ?? true,
+                            name: values.name,
+                            surname: values.surname,
+                        });
+                    }
+                }}
                 user={modalUser as any}
             />
-            <Flex justify="flex-end"><Button type="primary" onClick={() => setModalState(true)}><PlusOutlined /></Button></Flex>
+            <Flex justify="flex-end">
+                <Button
+                    type="primary"
+                    onClick={() => {
+                        setModalUser(undefined);
+                        setModalState(true);
+                    }}
+                >
+                    <PlusOutlined />
+                </Button>
+            </Flex>
             <DataTable<UserRow>
                 columns={columns}
                 data={data?.items ?? []}

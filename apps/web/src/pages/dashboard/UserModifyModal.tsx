@@ -48,13 +48,26 @@ const createUserSchema = baseUserSchema.extend({
         .string()
         .regex(passwordRegex, 'Kamida 1-8 simvol; 1 ta katta harf A-Z; 1 ta simvol  !,#..; bo’lishi shart')
     ,
-})
+});
 
-const updateUserSchema = baseUserSchema.extend({
-    password: z
+const updateUserSchema = z.object({
+    name: z
         .string()
-        .optional()
-    ,
+        .trim()
+        .min(2, 'Ism kamida 2 ta belgidan iborat bo‘lishi kerak')
+        .max(50, 'Ko\'pi bilan 50 ta belgidan oshmasligi lozim')
+        .regex(nameRegex, 'Ism faqat harflardan iborat bo‘lishi kerak'),
+
+    surname: z
+        .string()
+        .trim()
+        .min(2, 'Familiya kamida 2 ta belgidan iborat bo‘lishi kerak')
+        .max(50, 'Ko\'pi bilan 50 ta belgidan oshmasligi lozim')
+        .regex(nameRegex, 'Familiya faqat harflardan iborat bo‘lishi kerak'),
+
+    email: z.string().optional(),
+    password: z.string().optional(),
+    isActive: z.boolean().optional(),
 });
 
 export type CreateUserFormValues =
