@@ -1,0 +1,15 @@
+# Build outputs - should be generated during build
+apps/web/dist
+apps/api/dist
+apps/shared/dist
+
+# Local env files
+.env*.local
+
+# Docker
+docker
+docker-compose.yml
+.dockerignore
+
+# Dev files
+node_modules

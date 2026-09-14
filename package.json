@@ -1,6 +1,8 @@
 {
   "name": "erp-test",
   "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.26.0",
   "scripts": {
     "dev": "pnpm build:shared && concurrently \"pnpm --filter api start:dev\" \"pnpm --filter web dev\"",
     "dev:api": "pnpm build:shared && pnpm --filter api start:dev",

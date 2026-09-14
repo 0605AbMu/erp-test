@@ -51,7 +51,7 @@ function translateValidationErrors(errors: ValidationError[]): string {
   }).join('; ');
 }
 
-async function bootstrap() {
+export async function createApp() {
   const app = await NestFactory.create(AppModule, {
   });
 
@@ -63,14 +63,25 @@ async function bootstrap() {
   const express = app.getHttpAdapter().getInstance();
   express.set('trust proxy', 1);
 
-  app.enableCors(
-    // {
-    //   origin: [
-    //     'http://localhost:5173',
-    //     'https://example.com',
-    //   ],
-    // }
-  )
+  app.enableCors({
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      if (
+        !origin ||
+        !process.env.VERCEL ||
+        origin.startsWith('http://localhost') ||
+        origin.startsWith('http://127.0.0.1') ||
+        origin === 'https://erp-test-web.vercel.app' ||
+        origin.endsWith('.vercel.app')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Accept,Authorization,X-Requested-With',
+    credentials: true,
+  });
 
   // Configure ValidationPipe
   app.useGlobalPipes(
@@ -95,26 +106,34 @@ async function bootstrap() {
   app.enableVersioning();
 
   // Swagger configuration
-  if (config.NODE_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('Test ERP API')
-      .setDescription('Test ERP REST API')
-      .setVersion('1.0')
-      .addBearerAuth({ description: 'Sarlavhadagi JWT tokeni', type: 'http' })
-      .addSecurityRequirements('bearer')
-      .addGlobalResponse(...swaggerResponseFormats as any)
-      .build();
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Test ERP API')
+    .setDescription('Test ERP REST API')
+    .setVersion('1.0')
+    .addBearerAuth({ description: 'Sarlavhadagi JWT tokeni', type: 'http' })
+    .addSecurityRequirements('bearer')
+    .addGlobalResponse(...swaggerResponseFormats as any)
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-    SwaggerModule.setup('swagger', app, document, {
-      customCss: LightThemeCss,
-      swaggerOptions: { persistAuthorization: true },
-    });
-  }
+  SwaggerModule.setup('swagger', app, document, {
+    customCss: LightThemeCss,
+    customSiteTitle: 'Test ERP API Docs',
+    swaggerOptions: { persistAuthorization: true },
+  });
 
   app.enableShutdownHooks(); //for graceful shutdowns;
 
+  await app.init();
+  return app;
+}
+
+async function bootstrap() {
+  const app = await createApp();
   await app.listen(process.env.PORT ?? 3000);
 }
-await bootstrap();
+
+if (!process.env.VERCEL) {
+  await bootstrap();
+}

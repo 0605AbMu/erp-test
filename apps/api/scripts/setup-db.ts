@@ -17,28 +17,32 @@ async function createDatabase() {
     throw new Error('DATABASE_URL ichida ma’lumotlar bazasi nomi ko‘rsatilmagan');
   }
 
-  url.pathname = '/postgres';
-
-  const client = new Client({
-    connectionString: url.toString(),
-  });
-
-  await client.connect();
-
   try {
-    const result = await client.query(
-      'SELECT 1 FROM pg_database WHERE datname = $1',
-      [databaseName],
-    );
+    url.pathname = '/postgres';
 
-    if (result.rowCount === 0) {
-      await client.query(`CREATE DATABASE "${databaseName}"`);
-      console.log(`Database "${databaseName}" created`);
-    } else {
-      console.log(`Database "${databaseName}" already exists`);
+    const client = new Client({
+      connectionString: url.toString(),
+    });
+
+    await client.connect();
+
+    try {
+      const result = await client.query(
+        'SELECT 1 FROM pg_database WHERE datname = $1',
+        [databaseName],
+      );
+
+      if (result.rowCount === 0) {
+        await client.query(`CREATE DATABASE "${databaseName}"`);
+        console.log(`Database "${databaseName}" created`);
+      } else {
+        console.log(`Database "${databaseName}" already exists`);
+      }
+    } finally {
+      await client.end();
     }
-  } finally {
-    await client.end();
+  } catch (error: any) {
+    console.log(`Database check/create skipped (managed DB): ${error.message}`);
   }
 }
 
